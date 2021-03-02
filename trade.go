@@ -23,6 +23,8 @@ package bisquit
 import (
 	"context"
 	"time"
+
+	"google.golang.org/grpc"
 )
 
 // GetMarketPrice returns the price of Bitcoin in the given currency
@@ -49,7 +51,9 @@ func (c *Client) GetTradeStatistics(ctx context.Context) ([]*TradeStatistics3, e
 	}
 	ctx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
-	resp, err := c.tsc.GetTradeStatistics(ctx, &GetTradeStatisticsRequest{})
+	resp, err := c.tsc.GetTradeStatistics(
+		ctx, &GetTradeStatisticsRequest{},
+		grpc.MaxCallRecvMsgSize(52428800))
 	if err != nil {
 		return nil, err
 	}
