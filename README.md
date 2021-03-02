@@ -25,21 +25,10 @@ SPDX-License-Identifier: AGPL3.0-or-later
 
 ## Prerequisites
 
-This library is intended to be used with Go1.15+ and might not work
+This library is intended to be used with Go1.16+ and might not work
 correctly on previous versions.
 
-### Bisq daemon
-
-You need a running Bisq daemon (v1.5.4+) with enabled gRPC and API password
-to run the unit tests. Use
-
-```bash
-export BISQ_API_PASSWORD=<your password>
-```
-
-to pass the API password to the tests.
-
-### Protobuf definitions
+### Protobuf compiler
 
 You need to have a newer protobuf compiler for Go installed on your
 system; make sure you installed necessary dependencies:
@@ -48,6 +37,8 @@ system; make sure you installed necessary dependencies:
 go get -u google.golang.org/grpc
 go get -u google.golang.org/protobuf/cmd/protoc-gen-go
 ```
+
+### Protobuf definitions
 
 You also need the Protobuf definitions from the Bisq source tree (found at
 `proto/src/main/proto/grpc.proto` and `proto/src/main/proto/pb.proto` to
@@ -88,3 +79,17 @@ and then build the library with
 ```bash
 go build
 ```
+
+## Testing
+
+### Bisq daemon
+
+You need a running Bisq daemon (v1.5.4+) with enabled gRPC and API password
+to run the unit tests. Use
+
+```bash
+export BISQ_API_PASSWORD="my_secret"
+export BISQ_API_HOST="localhost:9998"
+```
+
+to pass the API password and host settings to the tests.
