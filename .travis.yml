@@ -3,9 +3,17 @@ sudo: false
 
 language: go
 go:
-  - "1.15"
+  - "1.16"
+
+before_install:
+  - "wget -O protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.15.3/protoc-3.15.3-linux-x86_64.zip"
+  - "unzip -d protoc protoc.zip"
+  - "export PATH=$PWD/protoc/bin:$PATH"
+  - "echo \"dependency_overrides: {protobuf: {path: ../protobuf}}\" >> protoc_plugin/pubspec.yaml"
 
 script:
   - "gofmt -l $(find . -name '*.go' | tr '\\n' ' ') >/dev/null"
   - gosrc=$(find . -name '*.go' | tr '\\n' ' '); [ $(gofmt -l $gosrc 2>&- | wc -l) -eq 0 ] || (echo 'gofmt was not run on these files:'; gofmt -l $gosrc 2>&-; false)
+  - protoc --go_out=. --go_opt=paths=source_relative pb.proto
+  - protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative grpc.proto
   - go test ./...
