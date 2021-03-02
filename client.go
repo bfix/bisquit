@@ -56,7 +56,7 @@ func NewClient(host, passwd string) *Client {
 	return &Client{
 		conn:    nil,
 		rpcHost: host,
-		creds:   PasswordCredential{passwd},
+		creds:   PasswordCredential(passwd),
 	}
 
 }

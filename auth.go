@@ -24,20 +24,18 @@ import (
 	"context"
 )
 
-// PasswordCredential for authentication
+// PasswordCredential for Bisq API authentication:
 // Must match "apiPassword=..." in "bisq.properties"
-type PasswordCredential struct {
-	passwd string
-}
+type PasswordCredential string
 
-// GetRequestMetadata for authentication
+// GetRequestMetadata for API password authentication
 func (c PasswordCredential) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
 	return map[string]string{
-		"password": c.passwd,
+		"password": string(c),
 	}, nil
 }
 
-// RequireTransportSecurity not mandatory
+// RequireTransportSecurity signals that insecure (local) connections are fine
 func (c PasswordCredential) RequireTransportSecurity() bool {
 	return false
 }
