@@ -9,7 +9,6 @@ before_install:
   - "wget -O protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.15.3/protoc-3.15.3-linux-x86_64.zip"
   - "unzip -d protoc protoc.zip"
   - "export PATH=$PWD/protoc/bin:$PATH"
-  - "echo \"dependency_overrides: {protobuf: {path: ../protobuf}}\" >> protoc_plugin/pubspec.yaml"
 
 script:
   - "gofmt -l $(find . -name '*.go' | tr '\\n' ' ') >/dev/null"
