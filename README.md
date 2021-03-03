@@ -57,10 +57,12 @@ in the `option` section at the beginning of the `*.proto` files.
 
 ### Generating Protobuf stubs
 
-To generate the Go code for the Protobuf definitions run
+To generate the Go code for the Protobuf definitions run the following
+commands in the base directory.
 
 ```bash
-./proto-gen.sh
+protoc --go_out=. --go_opt=paths=source_relative pb.proto
+protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative grpc.proto
 ```
 
 This should generate three new Go files: `grpc_grpc.pb.go`,
