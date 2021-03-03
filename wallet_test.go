@@ -22,21 +22,22 @@ package bisquit
 
 import (
 	"context"
+	"strings"
 	"testing"
 )
-
-/*
-rpc error: code = Unknown desc = balance is not yet available
 
 func TestGetBalances(t *testing.T) {
 	ctx := context.Background()
 	balances, err := testClient.GetBalances(ctx, "BTC")
 	if err != nil {
+		if strings.Contains(err.Error(), "balance is not yet available") {
+			t.Log("No balances available")
+			return
+		}
 		t.Fatal(err)
 	}
 	t.Logf("Balances: %v\n", balances)
 }
-*/
 
 func TestGetUnusedBsqAddress(t *testing.T) {
 	ctx := context.Background()
