@@ -27,11 +27,11 @@ import (
 
 func TestGetMarketPrice(t *testing.T) {
 	ctx := context.Background()
-	price, err := testClient.GetMarketPrice(ctx, "BTC")
+	price, err := testClient.GetMarketPrice(ctx, "EUR")
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("Market price (BTC): %f\n", price)
+	t.Logf("Market price (EUR): %f\n", price)
 }
 
 func TestGetTradeStatistics(t *testing.T) {
