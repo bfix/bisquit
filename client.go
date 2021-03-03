@@ -78,6 +78,7 @@ func (c *Client) Connect(ctx context.Context) (err error) {
 		c.pc = NewPriceClient(c.conn)
 		c.tsc = NewGetTradeStatisticsClient(c.conn)
 		c.tc = NewTradesClient(c.conn)
+		c.wc = NewWalletsClient(c.conn)
 	}
 	return
 }
@@ -98,6 +99,7 @@ func (c *Client) Close() error {
 	c.pc = nil
 	c.tsc = nil
 	c.tc = nil
+	c.wc = nil
 	return err
 }
 
