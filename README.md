@@ -28,7 +28,7 @@ SPDX-License-Identifier: AGPL3.0-or-later
 This library is intended to be used with Go1.16+ and might not work
 correctly on previous versions.
 
-### Protobuf compiler
+### Protobuf compiler (optional)
 
 You need to have a newer protobuf compiler for Go installed on your
 system; make sure you installed necessary dependencies:
@@ -38,7 +38,7 @@ go get -u google.golang.org/grpc
 go get -u google.golang.org/protobuf/cmd/protoc-gen-go
 ```
 
-### Protobuf definitions
+### Protobuf definitions (update optional)
 
 You also need the Protobuf definitions from the Bisq source tree (found at
 `proto/src/main/proto/grpc.proto` and `proto/src/main/proto/pb.proto` to
@@ -55,17 +55,21 @@ in the `option` section at the beginning of the `*.proto` files.
 
 ## Building
 
-### Generating Protobuf stubs
+### Generating Protobuf stubs (optional)
 
-To generate the Go code for the Protobuf definitions run the following
-commands in the base directory.
+The Go source code generated from the Protobuf definitions are included in
+the repository, so this step is optional and only required if newer Protobuf
+definitions are available.
+
+To generate the Go code from the Protobuf definitions, run the following
+commands in the base directory:
 
 ```bash
 protoc --go_out=. --go_opt=paths=source_relative pb.proto
 protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative grpc.proto
 ```
 
-This should generate three new Go files: `grpc_grpc.pb.go`,
+This should generate three (new) Go files: `grpc_grpc.pb.go`,
 `grpc.pb.go` and `pb.pb.go`.
 
 ### Compiling the library
