@@ -195,6 +195,7 @@ type OffersClient interface {
 	GetOffers(ctx context.Context, in *GetOffersRequest, opts ...grpc.CallOption) (*GetOffersReply, error)
 	GetMyOffers(ctx context.Context, in *GetMyOffersRequest, opts ...grpc.CallOption) (*GetMyOffersReply, error)
 	CreateOffer(ctx context.Context, in *CreateOfferRequest, opts ...grpc.CallOption) (*CreateOfferReply, error)
+	EditOffer(ctx context.Context, in *EditOfferRequest, opts ...grpc.CallOption) (*EditOfferReply, error)
 	CancelOffer(ctx context.Context, in *CancelOfferRequest, opts ...grpc.CallOption) (*CancelOfferReply, error)
 }
 
@@ -251,6 +252,15 @@ func (c *offersClient) CreateOffer(ctx context.Context, in *CreateOfferRequest, 
 	return out, nil
 }
 
+func (c *offersClient) EditOffer(ctx context.Context, in *EditOfferRequest, opts ...grpc.CallOption) (*EditOfferReply, error) {
+	out := new(EditOfferReply)
+	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Offers/EditOffer", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *offersClient) CancelOffer(ctx context.Context, in *CancelOfferRequest, opts ...grpc.CallOption) (*CancelOfferReply, error) {
 	out := new(CancelOfferReply)
 	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Offers/CancelOffer", in, out, opts...)
@@ -269,6 +279,7 @@ type OffersServer interface {
 	GetOffers(context.Context, *GetOffersRequest) (*GetOffersReply, error)
 	GetMyOffers(context.Context, *GetMyOffersRequest) (*GetMyOffersReply, error)
 	CreateOffer(context.Context, *CreateOfferRequest) (*CreateOfferReply, error)
+	EditOffer(context.Context, *EditOfferRequest) (*EditOfferReply, error)
 	CancelOffer(context.Context, *CancelOfferRequest) (*CancelOfferReply, error)
 	mustEmbedUnimplementedOffersServer()
 }
@@ -291,6 +302,9 @@ func (UnimplementedOffersServer) GetMyOffers(context.Context, *GetMyOffersReques
 }
 func (UnimplementedOffersServer) CreateOffer(context.Context, *CreateOfferRequest) (*CreateOfferReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateOffer not implemented")
+}
+func (UnimplementedOffersServer) EditOffer(context.Context, *EditOfferRequest) (*EditOfferReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EditOffer not implemented")
 }
 func (UnimplementedOffersServer) CancelOffer(context.Context, *CancelOfferRequest) (*CancelOfferReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelOffer not implemented")
@@ -398,6 +412,24 @@ func _Offers_CreateOffer_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Offers_EditOffer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EditOfferRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OffersServer).EditOffer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/io.bisq.protobuffer.Offers/EditOffer",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OffersServer).EditOffer(ctx, req.(*EditOfferRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Offers_CancelOffer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CancelOfferRequest)
 	if err := dec(in); err != nil {
@@ -444,6 +476,10 @@ var Offers_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Offers_CreateOffer_Handler,
 		},
 		{
+			MethodName: "EditOffer",
+			Handler:    _Offers_EditOffer_Handler,
+		},
+		{
 			MethodName: "CancelOffer",
 			Handler:    _Offers_CancelOffer_Handler,
 		},
@@ -460,6 +496,8 @@ type PaymentAccountsClient interface {
 	GetPaymentAccounts(ctx context.Context, in *GetPaymentAccountsRequest, opts ...grpc.CallOption) (*GetPaymentAccountsReply, error)
 	GetPaymentMethods(ctx context.Context, in *GetPaymentMethodsRequest, opts ...grpc.CallOption) (*GetPaymentMethodsReply, error)
 	GetPaymentAccountForm(ctx context.Context, in *GetPaymentAccountFormRequest, opts ...grpc.CallOption) (*GetPaymentAccountFormReply, error)
+	CreateCryptoCurrencyPaymentAccount(ctx context.Context, in *CreateCryptoCurrencyPaymentAccountRequest, opts ...grpc.CallOption) (*CreateCryptoCurrencyPaymentAccountReply, error)
+	GetCryptoCurrencyPaymentMethods(ctx context.Context, in *GetCryptoCurrencyPaymentMethodsRequest, opts ...grpc.CallOption) (*GetCryptoCurrencyPaymentMethodsReply, error)
 }
 
 type paymentAccountsClient struct {
@@ -506,6 +544,24 @@ func (c *paymentAccountsClient) GetPaymentAccountForm(ctx context.Context, in *G
 	return out, nil
 }
 
+func (c *paymentAccountsClient) CreateCryptoCurrencyPaymentAccount(ctx context.Context, in *CreateCryptoCurrencyPaymentAccountRequest, opts ...grpc.CallOption) (*CreateCryptoCurrencyPaymentAccountReply, error) {
+	out := new(CreateCryptoCurrencyPaymentAccountReply)
+	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.PaymentAccounts/CreateCryptoCurrencyPaymentAccount", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *paymentAccountsClient) GetCryptoCurrencyPaymentMethods(ctx context.Context, in *GetCryptoCurrencyPaymentMethodsRequest, opts ...grpc.CallOption) (*GetCryptoCurrencyPaymentMethodsReply, error) {
+	out := new(GetCryptoCurrencyPaymentMethodsReply)
+	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.PaymentAccounts/GetCryptoCurrencyPaymentMethods", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PaymentAccountsServer is the server API for PaymentAccounts service.
 // All implementations must embed UnimplementedPaymentAccountsServer
 // for forward compatibility
@@ -514,6 +570,8 @@ type PaymentAccountsServer interface {
 	GetPaymentAccounts(context.Context, *GetPaymentAccountsRequest) (*GetPaymentAccountsReply, error)
 	GetPaymentMethods(context.Context, *GetPaymentMethodsRequest) (*GetPaymentMethodsReply, error)
 	GetPaymentAccountForm(context.Context, *GetPaymentAccountFormRequest) (*GetPaymentAccountFormReply, error)
+	CreateCryptoCurrencyPaymentAccount(context.Context, *CreateCryptoCurrencyPaymentAccountRequest) (*CreateCryptoCurrencyPaymentAccountReply, error)
+	GetCryptoCurrencyPaymentMethods(context.Context, *GetCryptoCurrencyPaymentMethodsRequest) (*GetCryptoCurrencyPaymentMethodsReply, error)
 	mustEmbedUnimplementedPaymentAccountsServer()
 }
 
@@ -532,6 +590,12 @@ func (UnimplementedPaymentAccountsServer) GetPaymentMethods(context.Context, *Ge
 }
 func (UnimplementedPaymentAccountsServer) GetPaymentAccountForm(context.Context, *GetPaymentAccountFormRequest) (*GetPaymentAccountFormReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPaymentAccountForm not implemented")
+}
+func (UnimplementedPaymentAccountsServer) CreateCryptoCurrencyPaymentAccount(context.Context, *CreateCryptoCurrencyPaymentAccountRequest) (*CreateCryptoCurrencyPaymentAccountReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateCryptoCurrencyPaymentAccount not implemented")
+}
+func (UnimplementedPaymentAccountsServer) GetCryptoCurrencyPaymentMethods(context.Context, *GetCryptoCurrencyPaymentMethodsRequest) (*GetCryptoCurrencyPaymentMethodsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCryptoCurrencyPaymentMethods not implemented")
 }
 func (UnimplementedPaymentAccountsServer) mustEmbedUnimplementedPaymentAccountsServer() {}
 
@@ -618,6 +682,42 @@ func _PaymentAccounts_GetPaymentAccountForm_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PaymentAccounts_CreateCryptoCurrencyPaymentAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCryptoCurrencyPaymentAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PaymentAccountsServer).CreateCryptoCurrencyPaymentAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/io.bisq.protobuffer.PaymentAccounts/CreateCryptoCurrencyPaymentAccount",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PaymentAccountsServer).CreateCryptoCurrencyPaymentAccount(ctx, req.(*CreateCryptoCurrencyPaymentAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PaymentAccounts_GetCryptoCurrencyPaymentMethods_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCryptoCurrencyPaymentMethodsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PaymentAccountsServer).GetCryptoCurrencyPaymentMethods(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/io.bisq.protobuffer.PaymentAccounts/GetCryptoCurrencyPaymentMethods",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PaymentAccountsServer).GetCryptoCurrencyPaymentMethods(ctx, req.(*GetCryptoCurrencyPaymentMethodsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PaymentAccounts_ServiceDesc is the grpc.ServiceDesc for PaymentAccounts service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -640,6 +740,14 @@ var PaymentAccounts_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPaymentAccountForm",
 			Handler:    _PaymentAccounts_GetPaymentAccountForm_Handler,
+		},
+		{
+			MethodName: "CreateCryptoCurrencyPaymentAccount",
+			Handler:    _PaymentAccounts_CreateCryptoCurrencyPaymentAccount_Handler,
+		},
+		{
+			MethodName: "GetCryptoCurrencyPaymentMethods",
+			Handler:    _PaymentAccounts_GetCryptoCurrencyPaymentMethods_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -1179,6 +1287,7 @@ type WalletsClient interface {
 	GetUnusedBsqAddress(ctx context.Context, in *GetUnusedBsqAddressRequest, opts ...grpc.CallOption) (*GetUnusedBsqAddressReply, error)
 	SendBsq(ctx context.Context, in *SendBsqRequest, opts ...grpc.CallOption) (*SendBsqReply, error)
 	SendBtc(ctx context.Context, in *SendBtcRequest, opts ...grpc.CallOption) (*SendBtcReply, error)
+	VerifyBsqSentToAddress(ctx context.Context, in *VerifyBsqSentToAddressRequest, opts ...grpc.CallOption) (*VerifyBsqSentToAddressReply, error)
 	GetTxFeeRate(ctx context.Context, in *GetTxFeeRateRequest, opts ...grpc.CallOption) (*GetTxFeeRateReply, error)
 	SetTxFeeRatePreference(ctx context.Context, in *SetTxFeeRatePreferenceRequest, opts ...grpc.CallOption) (*SetTxFeeRatePreferenceReply, error)
 	UnsetTxFeeRatePreference(ctx context.Context, in *UnsetTxFeeRatePreferenceRequest, opts ...grpc.CallOption) (*UnsetTxFeeRatePreferenceReply, error)
@@ -1237,6 +1346,15 @@ func (c *walletsClient) SendBsq(ctx context.Context, in *SendBsqRequest, opts ..
 func (c *walletsClient) SendBtc(ctx context.Context, in *SendBtcRequest, opts ...grpc.CallOption) (*SendBtcReply, error) {
 	out := new(SendBtcReply)
 	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Wallets/SendBtc", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *walletsClient) VerifyBsqSentToAddress(ctx context.Context, in *VerifyBsqSentToAddressRequest, opts ...grpc.CallOption) (*VerifyBsqSentToAddressReply, error) {
+	out := new(VerifyBsqSentToAddressReply)
+	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Wallets/VerifyBsqSentToAddress", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1333,6 +1451,7 @@ type WalletsServer interface {
 	GetUnusedBsqAddress(context.Context, *GetUnusedBsqAddressRequest) (*GetUnusedBsqAddressReply, error)
 	SendBsq(context.Context, *SendBsqRequest) (*SendBsqReply, error)
 	SendBtc(context.Context, *SendBtcRequest) (*SendBtcReply, error)
+	VerifyBsqSentToAddress(context.Context, *VerifyBsqSentToAddressRequest) (*VerifyBsqSentToAddressReply, error)
 	GetTxFeeRate(context.Context, *GetTxFeeRateRequest) (*GetTxFeeRateReply, error)
 	SetTxFeeRatePreference(context.Context, *SetTxFeeRatePreferenceRequest) (*SetTxFeeRatePreferenceReply, error)
 	UnsetTxFeeRatePreference(context.Context, *UnsetTxFeeRatePreferenceRequest) (*UnsetTxFeeRatePreferenceReply, error)
@@ -1363,6 +1482,9 @@ func (UnimplementedWalletsServer) SendBsq(context.Context, *SendBsqRequest) (*Se
 }
 func (UnimplementedWalletsServer) SendBtc(context.Context, *SendBtcRequest) (*SendBtcReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendBtc not implemented")
+}
+func (UnimplementedWalletsServer) VerifyBsqSentToAddress(context.Context, *VerifyBsqSentToAddressRequest) (*VerifyBsqSentToAddressReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VerifyBsqSentToAddress not implemented")
 }
 func (UnimplementedWalletsServer) GetTxFeeRate(context.Context, *GetTxFeeRateRequest) (*GetTxFeeRateReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTxFeeRate not implemented")
@@ -1490,6 +1612,24 @@ func _Wallets_SendBtc_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WalletsServer).SendBtc(ctx, req.(*SendBtcRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Wallets_VerifyBsqSentToAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifyBsqSentToAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletsServer).VerifyBsqSentToAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/io.bisq.protobuffer.Wallets/VerifyBsqSentToAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletsServer).VerifyBsqSentToAddress(ctx, req.(*VerifyBsqSentToAddressRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1682,6 +1822,10 @@ var Wallets_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendBtc",
 			Handler:    _Wallets_SendBtc_Handler,
+		},
+		{
+			MethodName: "VerifyBsqSentToAddress",
+			Handler:    _Wallets_VerifyBsqSentToAddress_Handler,
 		},
 		{
 			MethodName: "GetTxFeeRate",

@@ -5,6 +5,7 @@ package io.bisq.protobuffer;
 // Protobuffer v3 definitions of network messages and persisted objects.
 //
 
+
 option go_package = ".;bisquit";
 option java_package = "protobuf";
 option java_multiple_files = true;
@@ -81,6 +82,8 @@ message NetworkEnvelope {
 
         GetInventoryRequest get_inventory_request = 52;
         GetInventoryResponse get_inventory_response = 53;
+
+        ShareBuyerPaymentAccountMessage share_buyer_payment_account_message = 54; // Added at 1.7.0
     }
 }
 
@@ -236,7 +239,7 @@ message InputsForDepositTxRequest {
     bytes taker_multi_sig_pub_key = 11;
     string taker_payout_address_string = 12;
     PubKeyRing taker_pub_key_ring = 13;
-    PaymentAccountPayload taker_payment_account_payload = 14;
+    PaymentAccountPayload taker_payment_account_payload = 14; // Not used anymore from 1.7.0 but kept for backward compatibility
     string taker_account_id = 15;
     string taker_fee_tx_id = 16;
     repeated NodeAddress accepted_arbitrator_node_addresses = 17;
@@ -248,11 +251,13 @@ message InputsForDepositTxRequest {
     int64 current_date = 23;
     repeated NodeAddress accepted_refund_agent_node_addresses = 24;
     NodeAddress refund_agent_node_address = 25;
+    bytes hash_of_takers_payment_account_payload = 26;
+    string takers_payout_method_id = 27;
 }
 
 message InputsForDepositTxResponse {
     string trade_id = 1;
-    PaymentAccountPayload maker_payment_account_payload = 2;
+    PaymentAccountPayload maker_payment_account_payload = 2; // Not used anymore from 1.7.0 but kept for backward compatibility
     string maker_account_id = 3;
     string maker_contract_as_json = 4;
     string maker_contract_signature = 5;
@@ -265,6 +270,8 @@ message InputsForDepositTxResponse {
     bytes account_age_witness_signature_of_prepared_deposit_tx = 12;
     int64 current_date = 13;
     int64 lock_time = 14;
+    bytes hash_of_makers_payment_account_payload = 15;
+    string makers_payout_method_id = 16;
 }
 
 message DelayedPayoutTxSignatureRequest {
@@ -289,6 +296,14 @@ message DepositTxAndDelayedPayoutTxMessage {
     NodeAddress sender_node_address = 3;
     bytes deposit_tx = 4;
     bytes delayed_payout_tx = 5;
+    PaymentAccountPayload seller_payment_account_payload = 6;
+}
+
+message ShareBuyerPaymentAccountMessage {
+    string uid = 1;
+    string trade_id = 2;
+    NodeAddress sender_node_address = 3;
+    PaymentAccountPayload buyer_payment_account_payload = 4;
 }
 
 message DepositTxMessage {
@@ -689,6 +704,7 @@ message Filter {
     repeated string banned_auto_conf_explorers = 25;
     repeated string node_addresses_banned_from_network = 26;
     bool disable_api = 27;
+    bool disable_mempool_validation = 28;
 }
 
 // Deprecated
@@ -804,6 +820,13 @@ message SignedWitness {
 
 
 message Dispute {
+    enum State {
+        NEEDS_UPGRADE = 0;
+        NEW = 1;
+        OPEN = 2;
+        REOPENED = 3;
+        CLOSED = 4;
+    }
     string trade_id = 1;
     string id = 2;
     int32 trader_id = 3;
@@ -831,6 +854,9 @@ message Dispute {
     string mediators_dispute_result = 25;
     string delayed_payout_tx_id = 26;
     string donation_address_of_delayed_payout_tx = 27;
+    State state = 28;
+    int64 trade_period_end = 29;
+    map<string, string> extra_data = 30;
 }
 
 message Attachment {
@@ -891,8 +917,8 @@ message Contract {
     bool is_buyer_maker_and_seller_taker = 6;
     string maker_account_id = 7;
     string taker_account_id = 8;
-    PaymentAccountPayload maker_payment_account_payload = 9;
-    PaymentAccountPayload taker_payment_account_payload = 10;
+    PaymentAccountPayload maker_payment_account_payload = 9; // Not used anymore from 1.7.0 but kept for backward compatibility
+    PaymentAccountPayload taker_payment_account_payload = 10; // Not used anymore from 1.7.0 but kept for backward compatibility
     PubKeyRing maker_pub_key_ring = 11;
     PubKeyRing taker_pub_key_ring = 12;
     NodeAddress buyer_node_address = 13;
@@ -904,6 +930,10 @@ message Contract {
     NodeAddress mediator_node_address = 19;
     int64 lock_time = 20;
     NodeAddress refund_agent_node_address = 21;
+    bytes hash_of_makers_payment_account_payload = 22;
+    bytes hash_of_takers_payment_account_payload = 23;
+    string maker_payment_method_id = 24;
+    string taker_payment_method_id = 25;
 }
 
 message RawTransactionInput {
@@ -926,6 +956,7 @@ enum AvailabilityResult {
     NO_REFUND_AGENTS = 10;
     UNCONF_TX_LIMIT_HIT = 11;
     MAKER_DENIED_API_USER = 12;
+    PRICE_CHECK_FAILED = 13;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -966,6 +997,9 @@ message PaymentAccountPayload {
         AustraliaPayidPayload australia_payid_payload = 30;
         AmazonGiftCardAccountPayload amazon_gift_card_account_payload = 31;
         CashByMailAccountPayload cash_by_mail_account_payload = 32;
+        CapitualAccountPayload capitual_account_payload = 33;
+        PayseraAccountPayload Paysera_account_payload = 34;
+        PaxumAccountPayload Paxum_account_payload = 35;
     }
     map<string, string> exclude_from_json_data = 15;
 }
@@ -1121,6 +1155,7 @@ message OKPayAccountPayload {
 
 message UpholdAccountPayload {
     string account_id = 1;
+    string account_owner = 2;
 }
 
 // Deprecated, not used anymore
@@ -1184,6 +1219,18 @@ message AdvancedCashAccountPayload {
 
 message TransferwiseAccountPayload {
     string email = 1;
+}
+
+message PayseraAccountPayload {
+    string email = 1;
+}
+
+message PaxumAccountPayload {
+    string email = 1;
+}
+
+message CapitualAccountPayload {
+    string account_nr = 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1532,6 +1579,7 @@ message TradingPeer {
     bytes account_age_witness_signature = 13;
     int64 current_date = 14;
     bytes mediated_payout_tx_signature = 15;
+    bytes hash_of_payment_account_payload = 16;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1820,6 +1868,8 @@ enum ScriptType {
     WITNESS_V0_KEYHASH = 6;
     WITNESS_V0_SCRIPTHASH = 7;
     NONSTANDARD = 8;
+    WITNESS_UNKNOWN = 9;
+    WITNESS_V1_TAPROOT = 10;
 }
 
 message PubKeyScript {
