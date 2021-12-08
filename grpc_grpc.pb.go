@@ -190,10 +190,15 @@ var Help_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OffersClient interface {
+	GetBsqSwapOffer(ctx context.Context, in *GetOfferRequest, opts ...grpc.CallOption) (*GetBsqSwapOfferReply, error)
 	GetOffer(ctx context.Context, in *GetOfferRequest, opts ...grpc.CallOption) (*GetOfferReply, error)
+	GetMyBsqSwapOffer(ctx context.Context, in *GetMyOfferRequest, opts ...grpc.CallOption) (*GetMyBsqSwapOfferReply, error)
 	GetMyOffer(ctx context.Context, in *GetMyOfferRequest, opts ...grpc.CallOption) (*GetMyOfferReply, error)
+	GetBsqSwapOffers(ctx context.Context, in *GetOffersRequest, opts ...grpc.CallOption) (*GetBsqSwapOffersReply, error)
 	GetOffers(ctx context.Context, in *GetOffersRequest, opts ...grpc.CallOption) (*GetOffersReply, error)
+	GetMyBsqSwapOffers(ctx context.Context, in *GetMyOffersRequest, opts ...grpc.CallOption) (*GetMyBsqSwapOffersReply, error)
 	GetMyOffers(ctx context.Context, in *GetMyOffersRequest, opts ...grpc.CallOption) (*GetMyOffersReply, error)
+	CreateBsqSwapOffer(ctx context.Context, in *CreateBsqSwapOfferRequest, opts ...grpc.CallOption) (*CreateBsqSwapOfferReply, error)
 	CreateOffer(ctx context.Context, in *CreateOfferRequest, opts ...grpc.CallOption) (*CreateOfferReply, error)
 	EditOffer(ctx context.Context, in *EditOfferRequest, opts ...grpc.CallOption) (*EditOfferReply, error)
 	CancelOffer(ctx context.Context, in *CancelOfferRequest, opts ...grpc.CallOption) (*CancelOfferReply, error)
@@ -207,9 +212,27 @@ func NewOffersClient(cc grpc.ClientConnInterface) OffersClient {
 	return &offersClient{cc}
 }
 
+func (c *offersClient) GetBsqSwapOffer(ctx context.Context, in *GetOfferRequest, opts ...grpc.CallOption) (*GetBsqSwapOfferReply, error) {
+	out := new(GetBsqSwapOfferReply)
+	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Offers/GetBsqSwapOffer", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *offersClient) GetOffer(ctx context.Context, in *GetOfferRequest, opts ...grpc.CallOption) (*GetOfferReply, error) {
 	out := new(GetOfferReply)
 	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Offers/GetOffer", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *offersClient) GetMyBsqSwapOffer(ctx context.Context, in *GetMyOfferRequest, opts ...grpc.CallOption) (*GetMyBsqSwapOfferReply, error) {
+	out := new(GetMyBsqSwapOfferReply)
+	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Offers/GetMyBsqSwapOffer", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -225,6 +248,15 @@ func (c *offersClient) GetMyOffer(ctx context.Context, in *GetMyOfferRequest, op
 	return out, nil
 }
 
+func (c *offersClient) GetBsqSwapOffers(ctx context.Context, in *GetOffersRequest, opts ...grpc.CallOption) (*GetBsqSwapOffersReply, error) {
+	out := new(GetBsqSwapOffersReply)
+	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Offers/GetBsqSwapOffers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *offersClient) GetOffers(ctx context.Context, in *GetOffersRequest, opts ...grpc.CallOption) (*GetOffersReply, error) {
 	out := new(GetOffersReply)
 	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Offers/GetOffers", in, out, opts...)
@@ -234,9 +266,27 @@ func (c *offersClient) GetOffers(ctx context.Context, in *GetOffersRequest, opts
 	return out, nil
 }
 
+func (c *offersClient) GetMyBsqSwapOffers(ctx context.Context, in *GetMyOffersRequest, opts ...grpc.CallOption) (*GetMyBsqSwapOffersReply, error) {
+	out := new(GetMyBsqSwapOffersReply)
+	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Offers/GetMyBsqSwapOffers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *offersClient) GetMyOffers(ctx context.Context, in *GetMyOffersRequest, opts ...grpc.CallOption) (*GetMyOffersReply, error) {
 	out := new(GetMyOffersReply)
 	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Offers/GetMyOffers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *offersClient) CreateBsqSwapOffer(ctx context.Context, in *CreateBsqSwapOfferRequest, opts ...grpc.CallOption) (*CreateBsqSwapOfferReply, error) {
+	out := new(CreateBsqSwapOfferReply)
+	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Offers/CreateBsqSwapOffer", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -274,10 +324,15 @@ func (c *offersClient) CancelOffer(ctx context.Context, in *CancelOfferRequest, 
 // All implementations must embed UnimplementedOffersServer
 // for forward compatibility
 type OffersServer interface {
+	GetBsqSwapOffer(context.Context, *GetOfferRequest) (*GetBsqSwapOfferReply, error)
 	GetOffer(context.Context, *GetOfferRequest) (*GetOfferReply, error)
+	GetMyBsqSwapOffer(context.Context, *GetMyOfferRequest) (*GetMyBsqSwapOfferReply, error)
 	GetMyOffer(context.Context, *GetMyOfferRequest) (*GetMyOfferReply, error)
+	GetBsqSwapOffers(context.Context, *GetOffersRequest) (*GetBsqSwapOffersReply, error)
 	GetOffers(context.Context, *GetOffersRequest) (*GetOffersReply, error)
+	GetMyBsqSwapOffers(context.Context, *GetMyOffersRequest) (*GetMyBsqSwapOffersReply, error)
 	GetMyOffers(context.Context, *GetMyOffersRequest) (*GetMyOffersReply, error)
+	CreateBsqSwapOffer(context.Context, *CreateBsqSwapOfferRequest) (*CreateBsqSwapOfferReply, error)
 	CreateOffer(context.Context, *CreateOfferRequest) (*CreateOfferReply, error)
 	EditOffer(context.Context, *EditOfferRequest) (*EditOfferReply, error)
 	CancelOffer(context.Context, *CancelOfferRequest) (*CancelOfferReply, error)
@@ -288,17 +343,32 @@ type OffersServer interface {
 type UnimplementedOffersServer struct {
 }
 
+func (UnimplementedOffersServer) GetBsqSwapOffer(context.Context, *GetOfferRequest) (*GetBsqSwapOfferReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBsqSwapOffer not implemented")
+}
 func (UnimplementedOffersServer) GetOffer(context.Context, *GetOfferRequest) (*GetOfferReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOffer not implemented")
+}
+func (UnimplementedOffersServer) GetMyBsqSwapOffer(context.Context, *GetMyOfferRequest) (*GetMyBsqSwapOfferReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMyBsqSwapOffer not implemented")
 }
 func (UnimplementedOffersServer) GetMyOffer(context.Context, *GetMyOfferRequest) (*GetMyOfferReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMyOffer not implemented")
 }
+func (UnimplementedOffersServer) GetBsqSwapOffers(context.Context, *GetOffersRequest) (*GetBsqSwapOffersReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBsqSwapOffers not implemented")
+}
 func (UnimplementedOffersServer) GetOffers(context.Context, *GetOffersRequest) (*GetOffersReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOffers not implemented")
 }
+func (UnimplementedOffersServer) GetMyBsqSwapOffers(context.Context, *GetMyOffersRequest) (*GetMyBsqSwapOffersReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMyBsqSwapOffers not implemented")
+}
 func (UnimplementedOffersServer) GetMyOffers(context.Context, *GetMyOffersRequest) (*GetMyOffersReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMyOffers not implemented")
+}
+func (UnimplementedOffersServer) CreateBsqSwapOffer(context.Context, *CreateBsqSwapOfferRequest) (*CreateBsqSwapOfferReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateBsqSwapOffer not implemented")
 }
 func (UnimplementedOffersServer) CreateOffer(context.Context, *CreateOfferRequest) (*CreateOfferReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateOffer not implemented")
@@ -322,6 +392,24 @@ func RegisterOffersServer(s grpc.ServiceRegistrar, srv OffersServer) {
 	s.RegisterService(&Offers_ServiceDesc, srv)
 }
 
+func _Offers_GetBsqSwapOffer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOfferRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OffersServer).GetBsqSwapOffer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/io.bisq.protobuffer.Offers/GetBsqSwapOffer",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OffersServer).GetBsqSwapOffer(ctx, req.(*GetOfferRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Offers_GetOffer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetOfferRequest)
 	if err := dec(in); err != nil {
@@ -336,6 +424,24 @@ func _Offers_GetOffer_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OffersServer).GetOffer(ctx, req.(*GetOfferRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Offers_GetMyBsqSwapOffer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMyOfferRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OffersServer).GetMyBsqSwapOffer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/io.bisq.protobuffer.Offers/GetMyBsqSwapOffer",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OffersServer).GetMyBsqSwapOffer(ctx, req.(*GetMyOfferRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -358,6 +464,24 @@ func _Offers_GetMyOffer_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Offers_GetBsqSwapOffers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOffersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OffersServer).GetBsqSwapOffers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/io.bisq.protobuffer.Offers/GetBsqSwapOffers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OffersServer).GetBsqSwapOffers(ctx, req.(*GetOffersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Offers_GetOffers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetOffersRequest)
 	if err := dec(in); err != nil {
@@ -376,6 +500,24 @@ func _Offers_GetOffers_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Offers_GetMyBsqSwapOffers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMyOffersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OffersServer).GetMyBsqSwapOffers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/io.bisq.protobuffer.Offers/GetMyBsqSwapOffers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OffersServer).GetMyBsqSwapOffers(ctx, req.(*GetMyOffersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Offers_GetMyOffers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetMyOffersRequest)
 	if err := dec(in); err != nil {
@@ -390,6 +532,24 @@ func _Offers_GetMyOffers_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OffersServer).GetMyOffers(ctx, req.(*GetMyOffersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Offers_CreateBsqSwapOffer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateBsqSwapOfferRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OffersServer).CreateBsqSwapOffer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/io.bisq.protobuffer.Offers/CreateBsqSwapOffer",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OffersServer).CreateBsqSwapOffer(ctx, req.(*CreateBsqSwapOfferRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -456,20 +616,40 @@ var Offers_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*OffersServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "GetBsqSwapOffer",
+			Handler:    _Offers_GetBsqSwapOffer_Handler,
+		},
+		{
 			MethodName: "GetOffer",
 			Handler:    _Offers_GetOffer_Handler,
+		},
+		{
+			MethodName: "GetMyBsqSwapOffer",
+			Handler:    _Offers_GetMyBsqSwapOffer_Handler,
 		},
 		{
 			MethodName: "GetMyOffer",
 			Handler:    _Offers_GetMyOffer_Handler,
 		},
 		{
+			MethodName: "GetBsqSwapOffers",
+			Handler:    _Offers_GetBsqSwapOffers_Handler,
+		},
+		{
 			MethodName: "GetOffers",
 			Handler:    _Offers_GetOffers_Handler,
 		},
 		{
+			MethodName: "GetMyBsqSwapOffers",
+			Handler:    _Offers_GetMyBsqSwapOffers_Handler,
+		},
+		{
 			MethodName: "GetMyOffers",
 			Handler:    _Offers_GetMyOffers_Handler,
+		},
+		{
+			MethodName: "CreateBsqSwapOffer",
+			Handler:    _Offers_CreateBsqSwapOffer_Handler,
 		},
 		{
 			MethodName: "CreateOffer",
@@ -1016,7 +1196,9 @@ var ShutdownServer_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TradesClient interface {
+	GetBsqSwapTrade(ctx context.Context, in *GetTradeRequest, opts ...grpc.CallOption) (*GetBsqSwapTradeReply, error)
 	GetTrade(ctx context.Context, in *GetTradeRequest, opts ...grpc.CallOption) (*GetTradeReply, error)
+	TakeBsqSwapOffer(ctx context.Context, in *TakeBsqSwapOfferRequest, opts ...grpc.CallOption) (*TakeBsqSwapOfferReply, error)
 	TakeOffer(ctx context.Context, in *TakeOfferRequest, opts ...grpc.CallOption) (*TakeOfferReply, error)
 	ConfirmPaymentStarted(ctx context.Context, in *ConfirmPaymentStartedRequest, opts ...grpc.CallOption) (*ConfirmPaymentStartedReply, error)
 	ConfirmPaymentReceived(ctx context.Context, in *ConfirmPaymentReceivedRequest, opts ...grpc.CallOption) (*ConfirmPaymentReceivedReply, error)
@@ -1032,9 +1214,27 @@ func NewTradesClient(cc grpc.ClientConnInterface) TradesClient {
 	return &tradesClient{cc}
 }
 
+func (c *tradesClient) GetBsqSwapTrade(ctx context.Context, in *GetTradeRequest, opts ...grpc.CallOption) (*GetBsqSwapTradeReply, error) {
+	out := new(GetBsqSwapTradeReply)
+	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Trades/GetBsqSwapTrade", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *tradesClient) GetTrade(ctx context.Context, in *GetTradeRequest, opts ...grpc.CallOption) (*GetTradeReply, error) {
 	out := new(GetTradeReply)
 	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Trades/GetTrade", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tradesClient) TakeBsqSwapOffer(ctx context.Context, in *TakeBsqSwapOfferRequest, opts ...grpc.CallOption) (*TakeBsqSwapOfferReply, error) {
+	out := new(TakeBsqSwapOfferReply)
+	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Trades/TakeBsqSwapOffer", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1090,7 +1290,9 @@ func (c *tradesClient) WithdrawFunds(ctx context.Context, in *WithdrawFundsReque
 // All implementations must embed UnimplementedTradesServer
 // for forward compatibility
 type TradesServer interface {
+	GetBsqSwapTrade(context.Context, *GetTradeRequest) (*GetBsqSwapTradeReply, error)
 	GetTrade(context.Context, *GetTradeRequest) (*GetTradeReply, error)
+	TakeBsqSwapOffer(context.Context, *TakeBsqSwapOfferRequest) (*TakeBsqSwapOfferReply, error)
 	TakeOffer(context.Context, *TakeOfferRequest) (*TakeOfferReply, error)
 	ConfirmPaymentStarted(context.Context, *ConfirmPaymentStartedRequest) (*ConfirmPaymentStartedReply, error)
 	ConfirmPaymentReceived(context.Context, *ConfirmPaymentReceivedRequest) (*ConfirmPaymentReceivedReply, error)
@@ -1103,8 +1305,14 @@ type TradesServer interface {
 type UnimplementedTradesServer struct {
 }
 
+func (UnimplementedTradesServer) GetBsqSwapTrade(context.Context, *GetTradeRequest) (*GetBsqSwapTradeReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBsqSwapTrade not implemented")
+}
 func (UnimplementedTradesServer) GetTrade(context.Context, *GetTradeRequest) (*GetTradeReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTrade not implemented")
+}
+func (UnimplementedTradesServer) TakeBsqSwapOffer(context.Context, *TakeBsqSwapOfferRequest) (*TakeBsqSwapOfferReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TakeBsqSwapOffer not implemented")
 }
 func (UnimplementedTradesServer) TakeOffer(context.Context, *TakeOfferRequest) (*TakeOfferReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TakeOffer not implemented")
@@ -1134,6 +1342,24 @@ func RegisterTradesServer(s grpc.ServiceRegistrar, srv TradesServer) {
 	s.RegisterService(&Trades_ServiceDesc, srv)
 }
 
+func _Trades_GetBsqSwapTrade_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTradeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradesServer).GetBsqSwapTrade(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/io.bisq.protobuffer.Trades/GetBsqSwapTrade",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradesServer).GetBsqSwapTrade(ctx, req.(*GetTradeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Trades_GetTrade_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetTradeRequest)
 	if err := dec(in); err != nil {
@@ -1148,6 +1374,24 @@ func _Trades_GetTrade_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradesServer).GetTrade(ctx, req.(*GetTradeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Trades_TakeBsqSwapOffer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TakeBsqSwapOfferRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradesServer).TakeBsqSwapOffer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/io.bisq.protobuffer.Trades/TakeBsqSwapOffer",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradesServer).TakeBsqSwapOffer(ctx, req.(*TakeBsqSwapOfferRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1250,8 +1494,16 @@ var Trades_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*TradesServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "GetBsqSwapTrade",
+			Handler:    _Trades_GetBsqSwapTrade_Handler,
+		},
+		{
 			MethodName: "GetTrade",
 			Handler:    _Trades_GetTrade_Handler,
+		},
+		{
+			MethodName: "TakeBsqSwapOffer",
+			Handler:    _Trades_TakeBsqSwapOffer_Handler,
 		},
 		{
 			MethodName: "TakeOffer",

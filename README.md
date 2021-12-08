@@ -34,8 +34,10 @@ You need to have a newer protobuf compiler for Go installed on your
 system; make sure you installed necessary dependencies:
 
 ```bash
-go get -u google.golang.org/grpc
-go get -u google.golang.org/protobuf/cmd/protoc-gen-go
+go get -u -d  google.golang.org/grpc
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
+go get -u -d  google.golang.org/protobuf
+go install google.golang.org/protobuf/cmd/protoc-gen-go
 ```
 
 ### Protobuf definitions (update optional)

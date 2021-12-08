@@ -84,6 +84,12 @@ message NetworkEnvelope {
         GetInventoryResponse get_inventory_response = 53;
 
         ShareBuyerPaymentAccountMessage share_buyer_payment_account_message = 54; // Added at 1.7.0
+
+        SellersBsqSwapRequest sellers_bsq_swap_request = 55;
+        BuyersBsqSwapRequest buyers_bsq_swap_request = 56;
+        BsqSwapTxInputsMessage bsq_swap_tx_inputs_message = 57;
+        BsqSwapFinalizeTxRequest bsq_swap_finalize_tx_request = 58;
+        BsqSwapFinalizedTxMessage bsq_swap_finalized_tx_message = 59;
     }
 }
 
@@ -374,6 +380,63 @@ message TraderSignedWitnessMessage {
     SignedWitness signed_witness = 4 [deprecated = true];
 }
 
+// BsqSwap
+message SellersBsqSwapRequest {
+    string uid = 1;
+    string trade_id = 2;
+    NodeAddress sender_node_address = 3;
+    PubKeyRing taker_pub_key_ring = 4;
+    int64 trade_amount = 5;
+    int64 tx_fee_per_vbyte = 6;
+    int64 maker_fee = 7;
+    int64 taker_fee = 8;
+    int64 trade_date = 9;
+}
+
+message BuyersBsqSwapRequest {
+    string uid = 1;
+    string trade_id = 2;
+    NodeAddress sender_node_address = 3;
+    PubKeyRing taker_pub_key_ring = 4;
+    int64 trade_amount = 5;
+    int64 tx_fee_per_vbyte = 6;
+    int64 maker_fee = 7;
+    int64 taker_fee = 8;
+    int64 trade_date = 9;
+    repeated RawTransactionInput bsq_inputs = 10;
+    int64 bsq_change = 11;
+    string buyers_btc_payout_address = 12;
+    string buyers_bsq_change_address = 13;
+}
+
+message BsqSwapTxInputsMessage {
+    string uid = 1;
+    string trade_id = 2;
+    NodeAddress sender_node_address = 3;
+    repeated RawTransactionInput bsq_inputs = 4;
+    int64 bsq_change = 5;
+    string buyers_btc_payout_address = 6;
+    string buyers_bsq_change_address = 7;
+}
+
+message BsqSwapFinalizeTxRequest {
+    string uid = 1;
+    string trade_id = 2;
+    NodeAddress sender_node_address = 3;
+    bytes tx = 4;
+    repeated RawTransactionInput btc_inputs = 5;
+    int64 btc_change = 6;
+    string bsq_payout_address = 7;
+    string btc_change_address = 8;
+}
+
+message BsqSwapFinalizedTxMessage {
+    string uid = 1;
+    string trade_id = 2;
+    NodeAddress sender_node_address = 3;
+    bytes tx = 4;
+}
+
 // dispute
 
 enum SupportType {
@@ -547,6 +610,7 @@ message StoragePayload {
         OfferPayload offer_payload = 7;
         TempProposalPayload temp_proposal_payload = 8;
         RefundAgent refund_agent = 9;
+        BsqSwapOfferPayload bsq_swap_offer_payload = 10;
     }
 }
 
@@ -705,13 +769,20 @@ message Filter {
     repeated string node_addresses_banned_from_network = 26;
     bool disable_api = 27;
     bool disable_mempool_validation = 28;
+    bool disable_pow_message = 29;
+    double pow_difficulty = 30;
+    int64 maker_fee_btc = 31;
+    int64 taker_fee_btc = 32;
+    int64 maker_fee_bsq = 33;
+    int64 taker_fee_bsq = 34;
+    repeated int32 enabled_pow_versions = 35;
 }
 
 // Deprecated
 message TradeStatistics2 {
     string base_currency = 1 [deprecated = true];
     string counter_currency = 2 [deprecated = true];
-    OfferPayload.Direction direction = 3 [deprecated = true];
+    OfferDirection direction = 3 [deprecated = true];
     int64 trade_price = 4 [deprecated = true];
     int64 trade_amount = 5 [deprecated = true];
     int64 trade_date = 6 [deprecated = true];
@@ -747,17 +818,11 @@ message MailboxStoragePayload {
 }
 
 message OfferPayload {
-    enum Direction {
-        PB_ERROR = 0;
-        BUY = 1;
-        SELL = 2;
-    }
-
     string id = 1;
     int64 date = 2;
     NodeAddress owner_node_address = 3;
     PubKeyRing pub_key_ring = 4;
-    Direction direction = 5;
+    OfferDirection direction = 5;
     int64 price = 6;
     double market_price_margin = 7;
     bool use_market_based_price = 8;
@@ -791,6 +856,37 @@ message OfferPayload {
     string hash_of_challenge = 36;
     map<string, string> extra_data = 37;
     int32 protocol_version = 38;
+}
+
+enum OfferDirection {
+    OFFER_DIRECTION_ERROR = 0;
+    BUY = 1;
+    SELL = 2;
+}
+
+message BsqSwapOfferPayload {
+    string id = 1;
+    int64 date = 2;
+    NodeAddress owner_node_address = 3;
+    PubKeyRing pub_key_ring = 4;
+    OfferDirection direction = 5;
+    int64 price = 6;
+    int64 amount = 7;
+    int64 min_amount = 8;
+    ProofOfWork proof_of_work = 9;
+    map<string, string> extra_data = 10;
+    string version_nr = 11;
+    int32 protocol_version = 12;
+}
+
+message ProofOfWork {
+    bytes payload = 1;
+    int64 counter = 2;
+    bytes challenge = 3;
+    double difficulty = 4;
+    int64 duration = 5;
+    bytes solution = 6;
+    int32 version = 7;
 }
 
 message AccountAgeWitness {
@@ -887,6 +983,16 @@ message DisputeResult {
         PEER_WAS_LATE = 12;
     }
 
+    enum PayoutSuggestion {
+        CUSTOM_PAYOUT = 0;
+        BUYER_GETS_TRADE_AMOUNT = 1;
+        BUYER_GETS_TRADE_AMOUNT_PLUS_COMPENSATION = 2;
+        BUYER_GETS_TRADE_AMOUNT_MINUS_PENALTY = 3;
+        SELLER_GETS_TRADE_AMOUNT = 4;
+        SELLER_GETS_TRADE_AMOUNT_PLUS_COMPENSATION = 5;
+        SELLER_GETS_TRADE_AMOUNT_MINUS_PENALTY = 6;
+    }
+
     string trade_id = 1;
     int32 trader_id = 2;
     Winner winner = 3;
@@ -902,6 +1008,8 @@ message DisputeResult {
     bytes arbitrator_pub_key = 13;
     int64 close_date = 14;
     bool is_loser_publisher = 15;
+    string payout_adjustment_percent = 16;
+    PayoutSuggestion payout_suggestion = 17;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -940,6 +1048,7 @@ message RawTransactionInput {
     int64 index = 1;
     bytes parent_transaction = 2;
     int64 value = 3;
+    int32 script_type_id = 4;
 }
 
 enum AvailabilityResult {
@@ -1000,6 +1109,11 @@ message PaymentAccountPayload {
         CapitualAccountPayload capitual_account_payload = 33;
         PayseraAccountPayload Paysera_account_payload = 34;
         PaxumAccountPayload Paxum_account_payload = 35;
+        SwiftAccountPayload swift_account_payload = 36;
+        CelPayAccountPayload cel_pay_account_payload = 37;
+        MoneseAccountPayload monese_account_payload = 38;
+        VerseAccountPayload verse_account_payload = 39;
+        BsqSwapAccountPayload bsq_swap_account_payload = 40;
     }
     map<string, string> exclude_from_json_data = 15;
 }
@@ -1031,6 +1145,16 @@ message CountryBasedPaymentAccountPayload {
         WesternUnionAccountPayload western_union_account_payload = 5;
         SepaInstantAccountPayload sepa_instant_account_payload = 6;
         F2FAccountPayload f2f_account_payload = 7;
+        UpiAccountPayload upi_account_payload = 9;
+        PaytmAccountPayload paytm_account_payload = 10;
+        IfscBasedAccountPayload ifsc_based_account_payload = 11;
+        NequiAccountPayload nequi_account_payload = 12;
+        BizumAccountPayload bizum_account_payload = 13;
+        PixAccountPayload pix_account_payload = 14;
+        SatispayAccountPayload satispay_account_payload = 15;
+        StrikeAccountPayload strike_account_payload = 16;
+        TikkieAccountPayload tikkie_account_payload = 17;
+        TransferwiseUsdAccountPayload transferwise_usd_account_payload = 18;
     }
 }
 
@@ -1047,8 +1171,18 @@ message BankAccountPayload {
         NationalBankAccountPayload national_bank_account_payload = 9;
         SameBankAccountPayload same_bank_accont_payload = 10;
         SpecificBanksAccountPayload specific_banks_account_payload = 11;
+        AchTransferAccountPayload ach_transfer_account_payload = 13;
+        DomesticWireTransferAccountPayload domestic_wire_transfer_account_payload = 14;
     }
     string national_account_id = 12;
+}
+
+message AchTransferAccountPayload {
+    string holder_address = 1;
+}
+
+message DomesticWireTransferAccountPayload {
+    string holder_address = 1;
 }
 
 message NationalBankAccountPayload {
@@ -1135,6 +1269,9 @@ message InstantCryptoCurrencyAccountPayload {
     string address = 1;
 }
 
+message BsqSwapAccountPayload {
+}
+
 message FasterPaymentsAccountPayload {
     string sort_code = 1;
     string account_nr = 2;
@@ -1203,6 +1340,34 @@ message F2FAccountPayload {
     string extra_info = 3;
 }
 
+message IfscBasedAccountPayload {
+    string holder_name = 1;
+    string account_nr = 2;
+    string ifsc = 3;
+    oneof message {
+        NeftAccountPayload neft_account_payload = 4;
+        RtgsAccountPayload rtgs_account_payload = 5;
+        ImpsAccountPayload imps_account_payload = 6;
+    }
+}
+
+message NeftAccountPayload {
+}
+
+message RtgsAccountPayload {
+}
+
+message ImpsAccountPayload {
+}
+
+message UpiAccountPayload {
+    string virtual_payment_address = 1;
+}
+
+message PaytmAccountPayload {
+    string email_or_mobile_nr = 1;
+}
+
 message CashByMailAccountPayload {
     string postal_address = 1;
     string contact = 2;
@@ -1221,6 +1386,12 @@ message TransferwiseAccountPayload {
     string email = 1;
 }
 
+message TransferwiseUsdAccountPayload {
+    string email = 1;
+    string holder_name = 2;
+    string beneficiary_address = 3;
+}
+
 message PayseraAccountPayload {
     string email = 1;
 }
@@ -1231,6 +1402,65 @@ message PaxumAccountPayload {
 
 message CapitualAccountPayload {
     string account_nr = 1;
+}
+
+message CelPayAccountPayload {
+    string email = 1;
+}
+
+message NequiAccountPayload {
+    string mobile_nr = 1;
+}
+
+message BizumAccountPayload {
+    string mobile_nr = 1;
+}
+
+message PixAccountPayload {
+    string pix_key = 1;
+}
+
+message MoneseAccountPayload {
+    string mobile_nr = 1;
+    string holder_name = 2;
+}
+
+message SatispayAccountPayload {
+    string mobile_nr = 1;
+    string holder_name = 2;
+}
+
+message StrikeAccountPayload {
+    string holder_name = 1;
+}
+
+message TikkieAccountPayload {
+    string iban = 1;
+}
+
+message VerseAccountPayload {
+    string holder_name = 1;
+}
+
+message SwiftAccountPayload {
+    string beneficiary_name = 1;
+    string beneficiary_account_nr = 2;
+    string beneficiary_address = 3;
+    string beneficiary_city = 4;
+    string beneficiary_phone = 5;
+    string special_instructions = 6;
+
+    string bank_swift_code = 7;
+    string bank_country_code = 8;
+    string bank_name = 9;
+    string bank_branch = 10;
+    string bank_address = 11;
+
+    string intermediary_swift_code = 12;
+    string intermediary_country_code = 13;
+    string intermediary_name = 14;
+    string intermediary_branch = 15;
+    string intermediary_address = 16;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1281,6 +1511,7 @@ message PersistableEnvelope {
         MailboxMessageList mailbox_message_list = 32;
         IgnoredMailboxMap ignored_mailbox_map = 33;
         RemovedPayloadsMap removed_payloads_map = 34;
+        BsqBlockStore bsq_block_store = 35;
     }
 }
 
@@ -1384,7 +1615,10 @@ message Offer {
         MAKER_OFFLINE = 6;
     }
 
-    OfferPayload offer_payload = 1;
+    oneof message {
+        OfferPayload offer_payload = 1;
+        BsqSwapOfferPayload bsq_swap_offer_payload = 2;
+    }
 }
 
 message OpenOffer {
@@ -1412,6 +1646,10 @@ message Tradable {
         BuyerAsTakerTrade buyer_as_taker_trade = 3;
         SellerAsMakerTrade seller_as_maker_trade = 4;
         SellerAsTakerTrade seller_as_taker_trade = 5;
+        BsqSwapBuyerAsMakerTrade bsq_swap_buyer_as_maker_trade = 6;
+        BsqSwapBuyerAsTakerTrade bsq_swap_buyer_as_taker_trade = 7;
+        BsqSwapSellerAsMakerTrade bsq_swap_seller_as_maker_trade = 8;
+        BsqSwapSellerAsTakerTrade bsq_swap_seller_as_taker_trade = 9;
     }
 }
 
@@ -1426,10 +1664,10 @@ message Trade {
         MAKER_SEND_FAILED_PUBLISH_DEPOSIT_TX_REQUEST = 6;
         TAKER_RECEIVED_PUBLISH_DEPOSIT_TX_REQUEST = 7;
         SELLER_PUBLISHED_DEPOSIT_TX = 8;
-        SELLER_SENT_DEPOSIT_TX_PUBLISHED_MSG = 9;
-        SELLER_SAW_ARRIVED_DEPOSIT_TX_PUBLISHED_MSG = 10;
-        SELLER_STORED_IN_MAILBOX_DEPOSIT_TX_PUBLISHED_MSG = 11;
-        SELLER_SEND_FAILED_DEPOSIT_TX_PUBLISHED_MSG = 12;
+        SELLER_SENT_DEPOSIT_TX_PUBLISHED_MSG = 9 [deprecated = true];
+        SELLER_SAW_ARRIVED_DEPOSIT_TX_PUBLISHED_MSG = 10 [deprecated = true];
+        SELLER_STORED_IN_MAILBOX_DEPOSIT_TX_PUBLISHED_MSG = 11 [deprecated = true];
+        SELLER_SEND_FAILED_DEPOSIT_TX_PUBLISHED_MSG = 12 [deprecated = true];
         BUYER_RECEIVED_DEPOSIT_TX_PUBLISHED_MSG = 13;
         BUYER_SAW_DEPOSIT_TX_IN_NETWORK = 14;
         DEPOSIT_CONFIRMED_IN_BLOCK_CHAIN = 15;
@@ -1540,6 +1778,44 @@ message SellerAsTakerTrade {
     Trade trade = 1;
 }
 
+message BsqSwapTrade {
+    enum State {
+        PB_ERROR_STATE = 0;
+        PREPARATION = 1;
+        COMPLETED = 2;
+        FAILED = 3;
+    }
+
+    string uid = 1;
+    Offer offer = 2;
+    int64 amount = 3;
+    int64 take_offer_date = 4;
+    NodeAddress peer_node_address = 5;
+    int64 mining_fee_per_byte = 6;
+    int64 maker_fee = 7;
+    int64 taker_fee = 8;
+    BsqSwapProtocolModel bsq_swap_protocol_model = 9;
+    string tx_id = 10;
+    string error_message = 11;
+    State state = 12;
+}
+
+message BsqSwapBuyerAsMakerTrade {
+    BsqSwapTrade bsq_swap_trade = 1;
+}
+
+message BsqSwapBuyerAsTakerTrade {
+    BsqSwapTrade bsq_swap_trade = 1;
+}
+
+message BsqSwapSellerAsMakerTrade {
+    BsqSwapTrade bsq_swap_trade = 1;
+}
+
+message BsqSwapSellerAsTakerTrade {
+    BsqSwapTrade bsq_swap_trade = 1;
+}
+
 message ProcessModel {
     TradingPeer trading_peer = 1;
     string offer_id = 2;
@@ -1581,6 +1857,29 @@ message TradingPeer {
     bytes mediated_payout_tx_signature = 15;
     bytes hash_of_payment_account_payload = 16;
 }
+
+message BsqSwapProtocolModel {
+    BsqSwapTradePeer trade_peer = 1;
+    PubKeyRing pub_key_ring = 2;
+    string btc_address = 3;
+    string bsq_address = 4;
+    repeated RawTransactionInput inputs = 5;
+    int64 change = 6;
+    int64 payout = 7;
+    bytes tx = 8;
+    int64 tx_fee = 9;
+}
+
+message BsqSwapTradePeer {
+    PubKeyRing pub_key_ring = 1;
+    string btc_address = 2;
+    string bsq_address = 3;
+    repeated RawTransactionInput inputs = 4;
+    int64 change = 5;
+    int64 payout = 6;
+    bytes tx = 7;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Dispute
@@ -1689,6 +1988,7 @@ message PreferencesPayload {
     bool show_offers_matching_my_accounts = 59;
     bool deny_api_taker = 60;
     bool notify_on_pre_release = 61;
+    bool use_full_mode_dao_monitor = 62;
 }
 
 message AutoConfirmSettings {
@@ -1737,6 +2037,10 @@ message BaseBlock {
         RawBlock raw_block = 5;
         Block block = 6;
     }
+}
+
+message BsqBlockStore {
+    repeated BaseBlock blocks = 1;
 }
 
 message RawBlock {
@@ -2125,20 +2429,21 @@ message DaoStateStore {
 message DaoStateHash {
     int32 height = 1;
     bytes hash = 2;
-    bytes prev_hash = 3;
+    bytes prev_hash = 3  [deprecated = true];
+    bool is_self_created = 4;
 }
 
 message ProposalStateHash {
     int32 height = 1;
     bytes hash = 2;
-    bytes prev_hash = 3;
+    bytes prev_hash = 3  [deprecated = true];
     int32 num_proposals = 4;
 }
 
 message BlindVoteStateHash {
     int32 height = 1;
     bytes hash = 2;
-    bytes prev_hash = 3;
+    bytes prev_hash = 3  [deprecated = true];
     int32 num_blind_votes = 4;
 }
 
