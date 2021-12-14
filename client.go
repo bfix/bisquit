@@ -39,6 +39,7 @@ type Client struct {
 	conn    *grpc.ClientConn   // active connection (close on exit)
 	rpcHost string             // host:port spec for Bisq gRPC daemon
 	creds   PasswordCredential // credential used in RPC call
+	timeout time.Duration      // RPC timeout deadline in seconds
 
 	// list of supported clients
 	dac DisputeAgentsClient
@@ -57,8 +58,18 @@ func NewClient(host, passwd string) *Client {
 		conn:    nil,
 		rpcHost: host,
 		creds:   PasswordCredential(passwd),
+		timeout: 5 * time.Second,
 	}
 
+}
+
+// SetTimeout for RPC requests
+func (c *Client) SetTimeout(t int) error {
+	if t < 1 || t > 300 {
+		return fmt.Errorf("invalid timeout value (%d)", t)
+	}
+	c.timeout = time.Duration(t) * time.Second
+	return nil
 }
 
 // Connect to Bisq gRPC server
@@ -109,7 +120,7 @@ func (c *Client) GetVersion(ctx context.Context) (string, error) {
 		return "", ErrClientNotConnected
 	}
 	srv := NewGetVersionClient(c.conn)
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	r, err := srv.GetVersion(ctx, &GetVersionRequest{})
 	if err != nil {

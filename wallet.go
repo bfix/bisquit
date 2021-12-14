@@ -22,7 +22,6 @@ package bisquit
 
 import (
 	"context"
-	"time"
 )
 
 // GetBalances returns balance info for given currency
@@ -30,7 +29,7 @@ func (c *Client) GetBalances(ctx context.Context, curr string) (*BalancesInfo, e
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &GetBalancesRequest{
 		CurrencyCode: curr,
@@ -47,7 +46,7 @@ func (c *Client) GetAddressBalance(ctx context.Context, addr string) (*AddressBa
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &GetAddressBalanceRequest{
 		Address: addr,
@@ -64,7 +63,7 @@ func (c *Client) GetUnusedBsqAddress(ctx context.Context) (string, error) {
 	if c.conn == nil {
 		return "", ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	resp, err := c.wc.GetUnusedBsqAddress(ctx, &GetUnusedBsqAddressRequest{})
 	if err != nil {
@@ -78,7 +77,7 @@ func (c *Client) SendBsq(ctx context.Context, address, amount, txFeeRate string)
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &SendBsqRequest{
 		Address:   address,
@@ -97,7 +96,7 @@ func (c *Client) SendBtc(ctx context.Context, address, amount, txFeeRate, memo s
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &SendBtcRequest{
 		Address:   address,
@@ -117,7 +116,7 @@ func (c *Client) GetTxFeeRate(ctx context.Context) (*TxFeeRateInfo, error) {
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	resp, err := c.wc.GetTxFeeRate(ctx, &GetTxFeeRateRequest{})
 	if err != nil {
@@ -131,7 +130,7 @@ func (c *Client) SetTxFeeRatePreference(ctx context.Context, pref uint64) (*TxFe
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &SetTxFeeRatePreferenceRequest{
 		TxFeeRatePreference: pref,
@@ -148,7 +147,7 @@ func (c *Client) UnsetTxFeeRatePreference(ctx context.Context) (*TxFeeRateInfo, 
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	resp, err := c.wc.UnsetTxFeeRatePreference(ctx, &UnsetTxFeeRatePreferenceRequest{})
 	if err != nil {
@@ -162,7 +161,7 @@ func (c *Client) GetTransaction(ctx context.Context, txID string) (*TxInfo, erro
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &GetTransactionRequest{
 		TxId: txID,
@@ -179,7 +178,7 @@ func (c *Client) GetFundingAddresses(ctx context.Context) ([]*AddressBalanceInfo
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	resp, err := c.wc.GetFundingAddresses(ctx, &GetFundingAddressesRequest{})
 	if err != nil {
@@ -193,7 +192,7 @@ func (c *Client) SetWalletPassword(ctx context.Context, passwdOld, passwdNew str
 	if c.conn == nil {
 		return ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &SetWalletPasswordRequest{
 		Password:    passwdOld,
@@ -208,7 +207,7 @@ func (c *Client) RemoveWalletPassword(ctx context.Context, passwd string) error 
 	if c.conn == nil {
 		return ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &RemoveWalletPasswordRequest{
 		Password: passwd,
@@ -222,7 +221,7 @@ func (c *Client) LockWallet(ctx context.Context) error {
 	if c.conn == nil {
 		return ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	_, err := c.wc.LockWallet(ctx, &LockWalletRequest{})
 	return err
@@ -233,7 +232,7 @@ func (c *Client) UnlockWallet(ctx context.Context, passwd string, timeout uint64
 	if c.conn == nil {
 		return ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &UnlockWalletRequest{
 		Password: passwd,

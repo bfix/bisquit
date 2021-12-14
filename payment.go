@@ -23,7 +23,6 @@ package bisquit
 import (
 	"context"
 	"encoding/json"
-	"time"
 )
 
 // CreatePaymentAccount creates a new payment account
@@ -31,7 +30,7 @@ func (c *Client) CreatePaymentAccount(ctx context.Context, form string) (*Paymen
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &CreatePaymentAccountRequest{
 		PaymentAccountForm: form,
@@ -48,7 +47,7 @@ func (c *Client) GetPaymentAccounts(ctx context.Context) ([]*PaymentAccount, err
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	resp, err := c.pac.GetPaymentAccounts(ctx, &GetPaymentAccountsRequest{})
 	if err != nil {
@@ -62,7 +61,7 @@ func (c *Client) GetPaymentMethods(ctx context.Context) ([]*PaymentMethod, error
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	resp, err := c.pac.GetPaymentMethods(ctx, &GetPaymentMethodsRequest{})
 	if err != nil {
@@ -76,7 +75,7 @@ func (c *Client) GetPaymentAccountForm(ctx context.Context, mthdID string) (map[
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &GetPaymentAccountFormRequest{
 		PaymentMethodId: mthdID,

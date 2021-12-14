@@ -22,7 +22,6 @@ package bisquit
 
 import (
 	"context"
-	"time"
 )
 
 // GetOffer returns the offer for a given ID
@@ -30,7 +29,7 @@ func (c *Client) GetOffer(ctx context.Context, ID string) (*OfferInfo, error) {
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &GetOfferRequest{
 		Id: ID,
@@ -47,7 +46,7 @@ func (c *Client) GetMyOffer(ctx context.Context, ID string) (*OfferInfo, error) 
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &GetMyOfferRequest{
 		Id: ID,
@@ -64,7 +63,7 @@ func (c *Client) GetOffers(ctx context.Context, dir, curr string) ([]*OfferInfo,
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &GetOffersRequest{
 		Direction:    dir,
@@ -82,7 +81,7 @@ func (c *Client) GetMyOffers(ctx context.Context, dir, curr string) ([]*OfferInf
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &GetMyOffersRequest{
 		Direction:    dir,
@@ -100,7 +99,7 @@ func (c *Client) CreateOffer(ctx context.Context, req *CreateOfferRequest) (*Off
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	resp, err := c.oc.CreateOffer(ctx, req)
 	if err != nil {
@@ -114,7 +113,7 @@ func (c *Client) CancelOffer(ctx context.Context, ID string) error {
 	if c.conn == nil {
 		return ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &CancelOfferRequest{
 		Id: ID,

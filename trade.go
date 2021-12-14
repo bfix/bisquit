@@ -22,7 +22,6 @@ package bisquit
 
 import (
 	"context"
-	"time"
 
 	"google.golang.org/grpc"
 )
@@ -32,7 +31,7 @@ func (c *Client) GetMarketPrice(ctx context.Context, curr string) (float64, erro
 	if c.conn == nil {
 		return 0.0, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &MarketPriceRequest{
 		CurrencyCode: curr,
@@ -49,7 +48,7 @@ func (c *Client) GetTradeStatistics(ctx context.Context) ([]*TradeStatistics3, e
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	resp, err := c.tsc.GetTradeStatistics(
 		ctx, &GetTradeStatisticsRequest{},
@@ -65,7 +64,7 @@ func (c *Client) GetTrade(ctx context.Context, ID string) (*TradeInfo, error) {
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &GetTradeRequest{
 		TradeId: ID,
@@ -82,7 +81,7 @@ func (c *Client) TakeOffer(ctx context.Context, offerID, accountID, takerFeeCurr
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &TakeOfferRequest{
 		OfferId:              offerID,
@@ -101,7 +100,7 @@ func (c *Client) ConfirmPaymentStarted(ctx context.Context, tradeID string) erro
 	if c.conn == nil {
 		return ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &ConfirmPaymentStartedRequest{
 		TradeId: tradeID,
@@ -115,7 +114,7 @@ func (c *Client) ConfirmPaymentReceived(ctx context.Context, tradeID string) err
 	if c.conn == nil {
 		return ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &ConfirmPaymentReceivedRequest{
 		TradeId: tradeID,
@@ -129,7 +128,7 @@ func (c *Client) KeepFunds(ctx context.Context, tradeID string) error {
 	if c.conn == nil {
 		return ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &KeepFundsRequest{
 		TradeId: tradeID,
@@ -143,7 +142,7 @@ func (c *Client) WithdrawFunds(ctx context.Context, tradeID, address, memo strin
 	if c.conn == nil {
 		return ErrClientNotConnected
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	req := &WithdrawFundsRequest{
 		TradeId: tradeID,
