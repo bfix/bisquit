@@ -22,8 +22,6 @@ package bisquit
 
 import (
 	"context"
-
-	"google.golang.org/grpc"
 )
 
 // GetMarketPrice returns the price of Bitcoin in the given currency
@@ -41,22 +39,6 @@ func (c *Client) GetMarketPrice(ctx context.Context, curr string) (float64, erro
 		return 0.0, err
 	}
 	return resp.Price, nil
-}
-
-// GetTradeStatistics returns a list of past trades
-func (c *Client) GetTradeStatistics(ctx context.Context) ([]*TradeStatistics3, error) {
-	if c.conn == nil {
-		return nil, ErrClientNotConnected
-	}
-	ctx, cancel := context.WithTimeout(ctx, c.timeout)
-	defer cancel()
-	resp, err := c.tsc.GetTradeStatistics(
-		ctx, &GetTradeStatisticsRequest{},
-		grpc.MaxCallRecvMsgSize(52428800))
-	if err != nil {
-		return nil, err
-	}
-	return resp.TradeStatistics, nil
 }
 
 // GetTrade returns the offer information for a trade with given ID
@@ -123,17 +105,45 @@ func (c *Client) ConfirmPaymentReceived(ctx context.Context, tradeID string) err
 	return err
 }
 
-// KeepFunds cancels a payment process
-func (c *Client) KeepFunds(ctx context.Context, tradeID string) error {
+// FailTrade cancels a trade
+func (c *Client) FailTrade(ctx context.Context, tradeID string) error {
 	if c.conn == nil {
 		return ErrClientNotConnected
 	}
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
-	req := &KeepFundsRequest{
+	req := &FailTradeRequest{
 		TradeId: tradeID,
 	}
-	_, err := c.tc.KeepFunds(ctx, req)
+	_, err := c.tc.FailTrade(ctx, req)
+	return err
+}
+
+// UnFailTrade revives a failed trade
+func (c *Client) UnFailTrade(ctx context.Context, tradeID string) error {
+	if c.conn == nil {
+		return ErrClientNotConnected
+	}
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
+	defer cancel()
+	req := &UnFailTradeRequest{
+		TradeId: tradeID,
+	}
+	_, err := c.tc.UnFailTrade(ctx, req)
+	return err
+}
+
+// CloseTrade closes a trade
+func (c *Client) CloseTrade(ctx context.Context, tradeID string) error {
+	if c.conn == nil {
+		return ErrClientNotConnected
+	}
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
+	defer cancel()
+	req := &CloseTradeRequest{
+		TradeId: tradeID,
+	}
+	_, err := c.tc.CloseTrade(ctx, req)
 	return err
 }
 

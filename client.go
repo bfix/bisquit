@@ -47,7 +47,6 @@ type Client struct {
 	oc  OffersClient
 	pac PaymentAccountsClient
 	pc  PriceClient
-	tsc GetTradeStatisticsClient
 	tc  TradesClient
 	wc  WalletsClient
 }
@@ -87,7 +86,6 @@ func (c *Client) Connect(ctx context.Context) (err error) {
 		c.oc = NewOffersClient(c.conn)
 		c.pac = NewPaymentAccountsClient(c.conn)
 		c.pc = NewPriceClient(c.conn)
-		c.tsc = NewGetTradeStatisticsClient(c.conn)
 		c.tc = NewTradesClient(c.conn)
 		c.wc = NewWalletsClient(c.conn)
 	}
@@ -108,7 +106,6 @@ func (c *Client) Close() error {
 	c.oc = nil
 	c.pac = nil
 	c.pc = nil
-	c.tsc = nil
 	c.tc = nil
 	c.wc = nil
 	return err

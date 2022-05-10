@@ -24,6 +24,23 @@ import (
 	"context"
 )
 
+// GetOfferCategory returns the category of the offer with given ID
+func (c *Client) GetOfferCategory(ctx context.Context, ID string) (*GetOfferCategoryReply_OfferCategory, error) {
+	if c.conn == nil {
+		return nil, ErrClientNotConnected
+	}
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
+	defer cancel()
+	req := &GetOfferCategoryRequest{
+		Id: ID,
+	}
+	resp, err := c.oc.GetOfferCategory(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &resp.OfferCategory, nil
+}
+
 // GetOffer returns the offer for a given ID
 func (c *Client) GetOffer(ctx context.Context, ID string) (*OfferInfo, error) {
 	if c.conn == nil {
@@ -123,7 +140,7 @@ func (c *Client) CancelOffer(ctx context.Context, ID string) error {
 }
 
 // GetBsqSwapOffer returns a BSQ swap offer for given identifier.
-func (c *Client) GetBsqSwapOffer(ctx context.Context, ID string) (*BsqSwapOfferInfo, error) {
+func (c *Client) GetBsqSwapOffer(ctx context.Context, ID string) (*OfferInfo, error) {
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
@@ -141,7 +158,7 @@ func (c *Client) GetBsqSwapOffer(ctx context.Context, ID string) (*BsqSwapOfferI
 }
 
 // GetMyBsqSwapOffer returns own BSQ swap offer for given identifier.
-func (c *Client) GetMyBsqSwapOffer(ctx context.Context, ID string) (*BsqSwapOfferInfo, error) {
+func (c *Client) GetMyBsqSwapOffer(ctx context.Context, ID string) (*OfferInfo, error) {
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
@@ -159,15 +176,14 @@ func (c *Client) GetMyBsqSwapOffer(ctx context.Context, ID string) (*BsqSwapOffe
 }
 
 // GetBsqSwapOffers returns a list of BSQ swap offers
-func (c *Client) GetBsqSwapOffers(ctx context.Context, dir, curr string) ([]*BsqSwapOfferInfo, error) {
+func (c *Client) GetBsqSwapOffers(ctx context.Context, dir, curr string) ([]*OfferInfo, error) {
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
-	req := &GetOffersRequest{
-		Direction:    dir,
-		CurrencyCode: curr,
+	req := &GetBsqSwapOffersRequest{
+		Direction: dir,
 	}
 	resp, err := c.oc.GetBsqSwapOffers(ctx, req)
 	if err != nil {
@@ -177,15 +193,14 @@ func (c *Client) GetBsqSwapOffers(ctx context.Context, dir, curr string) ([]*Bsq
 }
 
 // GetMyBsqSwapOffers returns a list of BSQ swap offers
-func (c *Client) GetMyBsqSwapOffers(ctx context.Context, dir, curr string) ([]*BsqSwapOfferInfo, error) {
+func (c *Client) GetMyBsqSwapOffers(ctx context.Context, dir, curr string) ([]*OfferInfo, error) {
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
-	req := &GetMyOffersRequest{
-		Direction:    dir,
-		CurrencyCode: curr,
+	req := &GetBsqSwapOffersRequest{
+		Direction: dir,
 	}
 	resp, err := c.oc.GetMyBsqSwapOffers(ctx, req)
 	if err != nil {
@@ -195,7 +210,7 @@ func (c *Client) GetMyBsqSwapOffers(ctx context.Context, dir, curr string) ([]*B
 }
 
 // CreateBsqSwapOffer creates a new BSQ swap offer
-func (c *Client) CreateBsqSwapOffer(ctx context.Context, req *CreateBsqSwapOfferRequest) (*BsqSwapOfferInfo, error) {
+func (c *Client) CreateBsqSwapOffer(ctx context.Context, req *CreateBsqSwapOfferRequest) (*OfferInfo, error) {
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}

@@ -33,14 +33,3 @@ func TestGetMarketPrice(t *testing.T) {
 	}
 	t.Logf("Market price (EUR): %f\n", price)
 }
-
-func TestGetTradeStatistics(t *testing.T) {
-	ctx := context.Background()
-	stats, err := testClient.GetTradeStatistics(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	for i, stat := range stats {
-		t.Logf("Stat#%d: %v\n", i, stat)
-	}
-}
