@@ -200,7 +200,8 @@ type OffersClient interface {
 	GetOfferCategory(ctx context.Context, in *GetOfferCategoryRequest, opts ...grpc.CallOption) (*GetOfferCategoryReply, error)
 	// Get the available BSQ swap offer with offer-id.
 	GetBsqSwapOffer(ctx context.Context, in *GetOfferRequest, opts ...grpc.CallOption) (*GetBsqSwapOfferReply, error)
-	// Get the v1 protocol offer with offer-id.
+	// Get the v1 protocol offer with an offer-id.  Your node must have a payment account with the same
+	// payment method as the offer's associated payment method, e,g., ACH_TRANSFER, CASH_DEPOSIT, etc.
 	GetOffer(ctx context.Context, in *GetOfferRequest, opts ...grpc.CallOption) (*GetOfferReply, error)
 	// Get user's BSQ swap offer with offer-id.
 	GetMyBsqSwapOffer(ctx context.Context, in *GetMyOfferRequest, opts ...grpc.CallOption) (*GetMyBsqSwapOfferReply, error)
@@ -208,7 +209,9 @@ type OffersClient interface {
 	GetMyOffer(ctx context.Context, in *GetMyOfferRequest, opts ...grpc.CallOption) (*GetMyOfferReply, error)
 	// Get all available BSQ swap offers with a BUY (BTC) or SELL (BTC) direction.
 	GetBsqSwapOffers(ctx context.Context, in *GetBsqSwapOffersRequest, opts ...grpc.CallOption) (*GetBsqSwapOffersReply, error)
-	// Get all available v1 protocol offers with a BUY (BTC) or SELL (BTC) direction.
+	// Get all available v1 protocol offers with a BUY (BTC) or SELL (BTC) direction.  The returned offers
+	// are restricted to those associated with payment methods matching the payment methods you have set up
+	// on your node, e,g., NATIONAL_BANK, US_POSTAL_MONEY_ORDER, etc.
 	GetOffers(ctx context.Context, in *GetOffersRequest, opts ...grpc.CallOption) (*GetOffersReply, error)
 	// Get all user's BSQ swap offers with a BUY (BTC) or SELL (BTC) direction.
 	GetMyBsqSwapOffers(ctx context.Context, in *GetBsqSwapOffersRequest, opts ...grpc.CallOption) (*GetMyBsqSwapOffersReply, error)
@@ -359,7 +362,8 @@ type OffersServer interface {
 	GetOfferCategory(context.Context, *GetOfferCategoryRequest) (*GetOfferCategoryReply, error)
 	// Get the available BSQ swap offer with offer-id.
 	GetBsqSwapOffer(context.Context, *GetOfferRequest) (*GetBsqSwapOfferReply, error)
-	// Get the v1 protocol offer with offer-id.
+	// Get the v1 protocol offer with an offer-id.  Your node must have a payment account with the same
+	// payment method as the offer's associated payment method, e,g., ACH_TRANSFER, CASH_DEPOSIT, etc.
 	GetOffer(context.Context, *GetOfferRequest) (*GetOfferReply, error)
 	// Get user's BSQ swap offer with offer-id.
 	GetMyBsqSwapOffer(context.Context, *GetMyOfferRequest) (*GetMyBsqSwapOfferReply, error)
@@ -367,7 +371,9 @@ type OffersServer interface {
 	GetMyOffer(context.Context, *GetMyOfferRequest) (*GetMyOfferReply, error)
 	// Get all available BSQ swap offers with a BUY (BTC) or SELL (BTC) direction.
 	GetBsqSwapOffers(context.Context, *GetBsqSwapOffersRequest) (*GetBsqSwapOffersReply, error)
-	// Get all available v1 protocol offers with a BUY (BTC) or SELL (BTC) direction.
+	// Get all available v1 protocol offers with a BUY (BTC) or SELL (BTC) direction.  The returned offers
+	// are restricted to those associated with payment methods matching the payment methods you have set up
+	// on your node, e,g., NATIONAL_BANK, US_POSTAL_MONEY_ORDER, etc.
 	GetOffers(context.Context, *GetOffersRequest) (*GetOffersReply, error)
 	// Get all user's BSQ swap offers with a BUY (BTC) or SELL (BTC) direction.
 	GetMyBsqSwapOffers(context.Context, *GetBsqSwapOffersRequest) (*GetMyBsqSwapOffersReply, error)
@@ -1022,6 +1028,9 @@ var PaymentAccounts_ServiceDesc = grpc.ServiceDesc{
 type PriceClient interface {
 	// Get the current market price for a crypto currency.
 	GetMarketPrice(ctx context.Context, in *MarketPriceRequest, opts ...grpc.CallOption) (*MarketPriceReply, error)
+	// Get the volume weighted average trade price for BSQ, calculated over N days.
+	// The response contains the average BSQ trade price in USD to 4 decimal places, and in BTC to 8 decimal places.
+	GetAverageBsqTradePrice(ctx context.Context, in *GetAverageBsqTradePriceRequest, opts ...grpc.CallOption) (*GetAverageBsqTradePriceReply, error)
 }
 
 type priceClient struct {
@@ -1041,12 +1050,24 @@ func (c *priceClient) GetMarketPrice(ctx context.Context, in *MarketPriceRequest
 	return out, nil
 }
 
+func (c *priceClient) GetAverageBsqTradePrice(ctx context.Context, in *GetAverageBsqTradePriceRequest, opts ...grpc.CallOption) (*GetAverageBsqTradePriceReply, error) {
+	out := new(GetAverageBsqTradePriceReply)
+	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Price/GetAverageBsqTradePrice", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PriceServer is the server API for Price service.
 // All implementations must embed UnimplementedPriceServer
 // for forward compatibility
 type PriceServer interface {
 	// Get the current market price for a crypto currency.
 	GetMarketPrice(context.Context, *MarketPriceRequest) (*MarketPriceReply, error)
+	// Get the volume weighted average trade price for BSQ, calculated over N days.
+	// The response contains the average BSQ trade price in USD to 4 decimal places, and in BTC to 8 decimal places.
+	GetAverageBsqTradePrice(context.Context, *GetAverageBsqTradePriceRequest) (*GetAverageBsqTradePriceReply, error)
 	mustEmbedUnimplementedPriceServer()
 }
 
@@ -1056,6 +1077,9 @@ type UnimplementedPriceServer struct {
 
 func (UnimplementedPriceServer) GetMarketPrice(context.Context, *MarketPriceRequest) (*MarketPriceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMarketPrice not implemented")
+}
+func (UnimplementedPriceServer) GetAverageBsqTradePrice(context.Context, *GetAverageBsqTradePriceRequest) (*GetAverageBsqTradePriceReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAverageBsqTradePrice not implemented")
 }
 func (UnimplementedPriceServer) mustEmbedUnimplementedPriceServer() {}
 
@@ -1088,6 +1112,24 @@ func _Price_GetMarketPrice_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Price_GetAverageBsqTradePrice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAverageBsqTradePriceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PriceServer).GetAverageBsqTradePrice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/io.bisq.protobuffer.Price/GetAverageBsqTradePrice",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PriceServer).GetAverageBsqTradePrice(ctx, req.(*GetAverageBsqTradePriceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Price_ServiceDesc is the grpc.ServiceDesc for Price service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1098,6 +1140,10 @@ var Price_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMarketPrice",
 			Handler:    _Price_GetMarketPrice_Handler,
+		},
+		{
+			MethodName: "GetAverageBsqTradePrice",
+			Handler:    _Price_GetAverageBsqTradePrice_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -1200,7 +1246,8 @@ type TradesClient interface {
 	GetTrade(ctx context.Context, in *GetTradeRequest, opts ...grpc.CallOption) (*GetTradeReply, error)
 	// Get currently open, or historical trades (closed or failed).
 	GetTrades(ctx context.Context, in *GetTradesRequest, opts ...grpc.CallOption) (*GetTradesReply, error)
-	// Take an open offer.
+	// Take an available offer.  Your node must have a payment account with the same payment method as
+	// the offer's payment method, e.g., NATIONAL_BANK, SEPA, SWIFT, etc.
 	TakeOffer(ctx context.Context, in *TakeOfferRequest, opts ...grpc.CallOption) (*TakeOfferReply, error)
 	// Send a 'payment started' message to a trading peer (the BTC seller).
 	ConfirmPaymentStarted(ctx context.Context, in *ConfirmPaymentStartedRequest, opts ...grpc.CallOption) (*ConfirmPaymentStartedReply, error)
@@ -1313,7 +1360,8 @@ type TradesServer interface {
 	GetTrade(context.Context, *GetTradeRequest) (*GetTradeReply, error)
 	// Get currently open, or historical trades (closed or failed).
 	GetTrades(context.Context, *GetTradesRequest) (*GetTradesReply, error)
-	// Take an open offer.
+	// Take an available offer.  Your node must have a payment account with the same payment method as
+	// the offer's payment method, e.g., NATIONAL_BANK, SEPA, SWIFT, etc.
 	TakeOffer(context.Context, *TakeOfferRequest) (*TakeOfferReply, error)
 	// Send a 'payment started' message to a trading peer (the BTC seller).
 	ConfirmPaymentStarted(context.Context, *ConfirmPaymentStartedRequest) (*ConfirmPaymentStartedReply, error)
@@ -1588,6 +1636,8 @@ var Trades_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WalletsClient interface {
+	// Get the name of the BTC / BSQ network (mainnet, testnet3, or regtest).
+	GetNetwork(ctx context.Context, in *GetNetworkRequest, opts ...grpc.CallOption) (*GetNetworkReply, error)
 	// Get the Bisq wallet's current BSQ and BTC balances.
 	GetBalances(ctx context.Context, in *GetBalancesRequest, opts ...grpc.CallOption) (*GetBalancesReply, error)
 	// Get BTC balance for a wallet address.
@@ -1604,10 +1654,12 @@ type WalletsClient interface {
 	VerifyBsqSentToAddress(ctx context.Context, in *VerifyBsqSentToAddressRequest, opts ...grpc.CallOption) (*VerifyBsqSentToAddressReply, error)
 	// Get the Bisq network's most recently available bitcoin miner transaction fee rate, or custom fee rate if set.
 	GetTxFeeRate(ctx context.Context, in *GetTxFeeRateRequest, opts ...grpc.CallOption) (*GetTxFeeRateReply, error)
-	// Set the Bisq daemon's custom bitcoin miner transaction fee rate, in sats/byte..
+	// Set the Bisq daemon's custom bitcoin miner transaction fee rate, in sats/byte.
 	SetTxFeeRatePreference(ctx context.Context, in *SetTxFeeRatePreferenceRequest, opts ...grpc.CallOption) (*SetTxFeeRatePreferenceReply, error)
 	// Remove the custom bitcoin miner transaction fee rate;  revert to the Bisq network's bitcoin miner transaction fee rate.
 	UnsetTxFeeRatePreference(ctx context.Context, in *UnsetTxFeeRatePreferenceRequest, opts ...grpc.CallOption) (*UnsetTxFeeRatePreferenceReply, error)
+	// Get a bitcoin transactions.
+	GetTransactions(ctx context.Context, in *GetTransactionsRequest, opts ...grpc.CallOption) (*GetTransactionsReply, error)
 	// Get a bitcoin transaction summary.
 	GetTransaction(ctx context.Context, in *GetTransactionRequest, opts ...grpc.CallOption) (*GetTransactionReply, error)
 	// Get all bitcoin receiving addresses in the Bisq BTC wallet.
@@ -1631,6 +1683,15 @@ type walletsClient struct {
 
 func NewWalletsClient(cc grpc.ClientConnInterface) WalletsClient {
 	return &walletsClient{cc}
+}
+
+func (c *walletsClient) GetNetwork(ctx context.Context, in *GetNetworkRequest, opts ...grpc.CallOption) (*GetNetworkReply, error) {
+	out := new(GetNetworkReply)
+	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Wallets/GetNetwork", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *walletsClient) GetBalances(ctx context.Context, in *GetBalancesRequest, opts ...grpc.CallOption) (*GetBalancesReply, error) {
@@ -1714,6 +1775,15 @@ func (c *walletsClient) UnsetTxFeeRatePreference(ctx context.Context, in *UnsetT
 	return out, nil
 }
 
+func (c *walletsClient) GetTransactions(ctx context.Context, in *GetTransactionsRequest, opts ...grpc.CallOption) (*GetTransactionsReply, error) {
+	out := new(GetTransactionsReply)
+	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Wallets/GetTransactions", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *walletsClient) GetTransaction(ctx context.Context, in *GetTransactionRequest, opts ...grpc.CallOption) (*GetTransactionReply, error) {
 	out := new(GetTransactionReply)
 	err := c.cc.Invoke(ctx, "/io.bisq.protobuffer.Wallets/GetTransaction", in, out, opts...)
@@ -1772,6 +1842,8 @@ func (c *walletsClient) UnlockWallet(ctx context.Context, in *UnlockWalletReques
 // All implementations must embed UnimplementedWalletsServer
 // for forward compatibility
 type WalletsServer interface {
+	// Get the name of the BTC / BSQ network (mainnet, testnet3, or regtest).
+	GetNetwork(context.Context, *GetNetworkRequest) (*GetNetworkReply, error)
 	// Get the Bisq wallet's current BSQ and BTC balances.
 	GetBalances(context.Context, *GetBalancesRequest) (*GetBalancesReply, error)
 	// Get BTC balance for a wallet address.
@@ -1788,10 +1860,12 @@ type WalletsServer interface {
 	VerifyBsqSentToAddress(context.Context, *VerifyBsqSentToAddressRequest) (*VerifyBsqSentToAddressReply, error)
 	// Get the Bisq network's most recently available bitcoin miner transaction fee rate, or custom fee rate if set.
 	GetTxFeeRate(context.Context, *GetTxFeeRateRequest) (*GetTxFeeRateReply, error)
-	// Set the Bisq daemon's custom bitcoin miner transaction fee rate, in sats/byte..
+	// Set the Bisq daemon's custom bitcoin miner transaction fee rate, in sats/byte.
 	SetTxFeeRatePreference(context.Context, *SetTxFeeRatePreferenceRequest) (*SetTxFeeRatePreferenceReply, error)
 	// Remove the custom bitcoin miner transaction fee rate;  revert to the Bisq network's bitcoin miner transaction fee rate.
 	UnsetTxFeeRatePreference(context.Context, *UnsetTxFeeRatePreferenceRequest) (*UnsetTxFeeRatePreferenceReply, error)
+	// Get a bitcoin transactions.
+	GetTransactions(context.Context, *GetTransactionsRequest) (*GetTransactionsReply, error)
 	// Get a bitcoin transaction summary.
 	GetTransaction(context.Context, *GetTransactionRequest) (*GetTransactionReply, error)
 	// Get all bitcoin receiving addresses in the Bisq BTC wallet.
@@ -1814,6 +1888,9 @@ type WalletsServer interface {
 type UnimplementedWalletsServer struct {
 }
 
+func (UnimplementedWalletsServer) GetNetwork(context.Context, *GetNetworkRequest) (*GetNetworkReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNetwork not implemented")
+}
 func (UnimplementedWalletsServer) GetBalances(context.Context, *GetBalancesRequest) (*GetBalancesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBalances not implemented")
 }
@@ -1840,6 +1917,9 @@ func (UnimplementedWalletsServer) SetTxFeeRatePreference(context.Context, *SetTx
 }
 func (UnimplementedWalletsServer) UnsetTxFeeRatePreference(context.Context, *UnsetTxFeeRatePreferenceRequest) (*UnsetTxFeeRatePreferenceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnsetTxFeeRatePreference not implemented")
+}
+func (UnimplementedWalletsServer) GetTransactions(context.Context, *GetTransactionsRequest) (*GetTransactionsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTransactions not implemented")
 }
 func (UnimplementedWalletsServer) GetTransaction(context.Context, *GetTransactionRequest) (*GetTransactionReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTransaction not implemented")
@@ -1870,6 +1950,24 @@ type UnsafeWalletsServer interface {
 
 func RegisterWalletsServer(s grpc.ServiceRegistrar, srv WalletsServer) {
 	s.RegisterService(&Wallets_ServiceDesc, srv)
+}
+
+func _Wallets_GetNetwork_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetNetworkRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletsServer).GetNetwork(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/io.bisq.protobuffer.Wallets/GetNetwork",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletsServer).GetNetwork(ctx, req.(*GetNetworkRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Wallets_GetBalances_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -2034,6 +2132,24 @@ func _Wallets_UnsetTxFeeRatePreference_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Wallets_GetTransactions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTransactionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletsServer).GetTransactions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/io.bisq.protobuffer.Wallets/GetTransactions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletsServer).GetTransactions(ctx, req.(*GetTransactionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Wallets_GetTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetTransactionRequest)
 	if err := dec(in); err != nil {
@@ -2150,6 +2266,10 @@ var Wallets_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*WalletsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "GetNetwork",
+			Handler:    _Wallets_GetNetwork_Handler,
+		},
+		{
 			MethodName: "GetBalances",
 			Handler:    _Wallets_GetBalances_Handler,
 		},
@@ -2184,6 +2304,10 @@ var Wallets_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UnsetTxFeeRatePreference",
 			Handler:    _Wallets_UnsetTxFeeRatePreference_Handler,
+		},
+		{
+			MethodName: "GetTransactions",
+			Handler:    _Wallets_GetTransactions_Handler,
 		},
 		{
 			MethodName: "GetTransaction",

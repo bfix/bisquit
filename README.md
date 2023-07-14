@@ -6,7 +6,7 @@
 Bisquit: Bisq API client
 ========================
 
-(c) 2021 Bernd Fix <brf@hoi-polloi.org>   >Y<
+(c) 2021-2023 Bernd Fix <brf@hoi-polloi.org>   >Y<
 
 bisquit is free software: you can redistribute it and/or modify it
 under the terms of the GNU Affero General Public License as published
@@ -25,7 +25,7 @@ SPDX-License-Identifier: AGPL3.0-or-later
 
 ## Prerequisites
 
-This library is intended to be used with Go1.16+ and might not work
+This library is intended to be used with Go1.20+ and might not work
 correctly on previous versions.
 
 ### Protobuf compiler (optional)
@@ -92,7 +92,7 @@ go build
 
 ### Bisq daemon
 
-You need a running Bisq daemon (v1.5.4+) with enabled gRPC and API password
+You need a running Bisq daemon (v1.9.10+) with enabled gRPC and API password
 to run the unit tests. Use
 
 ```bash
