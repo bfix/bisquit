@@ -3,10 +3,10 @@ sudo: false
 
 language: go
 go:
-  - "1.16"
+  - "1.20"
 
 before_install:
-  - "wget -O protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.15.3/protoc-3.15.3-linux-x86_64.zip"
+  - "wget -O protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v23.4/protoc-23.4-linux-x86_64.zip"
   - "unzip -d protoc protoc.zip"
   - "export PATH=$PWD/protoc/bin:$PATH"
   - "go get google.golang.org/grpc/cmd/protoc-gen-go-grpc"
@@ -16,5 +16,5 @@ before_install:
 
 script:
   - "gofmt -l $(find . -name '*.go' | tr '\\n' ' ') >/dev/null"
-  - gosrc=$(find . -name '*.go' | tr '\\n' ' '); [ $(gofmt -l $gosrc 2>&- | wc -l) -eq 0 ] || (echo 'gofmt was not run on these files:'; gofmt -l $gosrc 2>&-; false)
-  - go test ./...
+  - "gosrc=$(find . -name '*.go' | tr '\\n' ' '); [ $(gofmt -l $gosrc 2>&- | wc -l) -eq 0 ] || (echo 'gofmt was not run on these files:'; gofmt -l $gosrc 2>&-; false)"
+  - "go test ./..."
