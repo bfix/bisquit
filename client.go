@@ -78,7 +78,10 @@ func (c *Client) Connect(ctx context.Context) (err error) {
 		return ErrClientConnected
 	}
 	// dial gRPC server with given credentials
-	c.conn, err = grpc.DialContext(ctx, c.rpcHost, grpc.WithInsecure(), grpc.WithPerRPCCredentials(c.creds))
+	c.conn, err = grpc.DialContext(ctx, c.rpcHost,
+		grpc.WithInsecure(),
+		grpc.WithPerRPCCredentials(c.creds),
+		grpc.WithBlock())
 	if err == nil {
 		// instantiate all supported sub-clients
 		c.dac = NewDisputeAgentsClient(c.conn)
