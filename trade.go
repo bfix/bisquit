@@ -58,6 +58,24 @@ func (c *Client) GetTrade(ctx context.Context, ID string) (*TradeInfo, error) {
 	return resp.Trade, nil
 }
 
+// GetTrades returns offers:
+// mode = 0 (Open), 1 (Closed), 2 (Failed)
+func (c *Client) GetTrades(ctx context.Context, mode int) ([]*TradeInfo, error) {
+	if c.conn == nil {
+		return nil, ErrClientNotConnected
+	}
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
+	defer cancel()
+	req := &GetTradesRequest{
+		Category: GetTradesRequest_Category(mode),
+	}
+	resp, err := c.tc.GetTrades(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Trades, nil
+}
+
 // TakeOffer accepts an offer with given ID
 func (c *Client) TakeOffer(ctx context.Context, offerID, accountID, takerFeeCurrency string) (*TradeInfo, error) {
 	if c.conn == nil {
