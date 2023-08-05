@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // Error codes
@@ -72,15 +73,17 @@ func (c *Client) SetTimeout(t int) error {
 }
 
 // Connect to Bisq gRPC server
-func (c *Client) Connect(ctx context.Context) (err error) {
+func (c *Client) Connect(ctx context.Context, timeout time.Duration) (err error) {
 	// check if client is already connected
 	if c.conn != nil {
 		return ErrClientConnected
 	}
 	// dial gRPC server with given credentials
-	c.conn, err = grpc.DialContext(ctx, c.rpcHost,
-		grpc.WithInsecure(),
+	xctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	c.conn, err = grpc.DialContext(xctx, c.rpcHost,
 		grpc.WithPerRPCCredentials(c.creds),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock())
 	if err == nil {
 		// instantiate all supported sub-clients

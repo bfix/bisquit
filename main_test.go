@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 )
 
 var (
@@ -46,7 +47,7 @@ func TestMain(m *testing.M) {
 	// connect client to Bisq instance
 	ctx := context.Background()
 	testClient = NewClient(host, passwd)
-	if err := testClient.Connect(ctx); err != nil {
+	if err := testClient.Connect(ctx, time.Minute); err != nil {
 		fmt.Printf("ERROR: %s\n", err.Error())
 		os.Exit(1)
 	}
