@@ -53,12 +53,12 @@ type Client struct {
 }
 
 // NewClient instaniates a new Bisq client
-func NewClient(host, passwd string) *Client {
+func NewClient(host, passwd string, timeout time.Duration) *Client {
 	return &Client{
 		conn:    nil,
 		rpcHost: host,
 		creds:   PasswordCredential(passwd),
-		timeout: 5 * time.Second,
+		timeout: timeout,
 	}
 
 }
