@@ -77,7 +77,7 @@ func (c *Client) GetTrades(ctx context.Context, mode int) ([]*TradeInfo, error) 
 }
 
 // TakeOffer accepts an offer with given ID
-func (c *Client) TakeOffer(ctx context.Context, offerID, accountID, takerFeeCurrency string) (*TradeInfo, error) {
+func (c *Client) TakeOffer(ctx context.Context, amount int64, offerID, accountID, takerFeeCurrency string) (*TradeInfo, error) {
 	if c.conn == nil {
 		return nil, ErrClientNotConnected
 	}
@@ -87,6 +87,7 @@ func (c *Client) TakeOffer(ctx context.Context, offerID, accountID, takerFeeCurr
 		OfferId:              offerID,
 		PaymentAccountId:     accountID,
 		TakerFeeCurrencyCode: takerFeeCurrency,
+		Amount:               uint64(amount),
 	}
 	resp, err := c.tc.TakeOffer(ctx, req)
 	if err != nil {
